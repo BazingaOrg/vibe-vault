@@ -1,0 +1,29 @@
+export const STYLE_VOCABULARY = [
+  "Minimalism", "Swiss-International", "Neo-Brutalism", "Brutalism", "Glassmorphism",
+  "Neumorphism", "Claymorphism", "Flat", "Material", "Skeuomorphism", "Editorial",
+  "Corporate", "Dark-Tech", "Retro-Y2K", "Memphis", "Maximalism", "Luxury-Elegant",
+  "Geometric-Bauhaus", "Playful-Illustrative", "Organic-Natural"
+] as const;
+export type StyleName = typeof STYLE_VOCABULARY[number];
+export type Stability = "L1" | "L2" | "L3" | "L4";
+
+export interface RawSample {
+  tag: string; text: boolean; media: boolean; rect: { x: number; y: number; width: number; height: number };
+  colors: Record<string, string>; fontFamily: string; fontSize: number; fontWeight: number; lineHeight: number;
+  radius: number; shadow: string; spacing: number[]; root?: boolean;
+}
+export interface RawExtraction {
+  url: string; id: string; collectedAt: string; viewport: { width: number; height: number };
+  samples: RawSample[]; rootVariables: Record<string, string>; mediaRects: RawSample["rect"][]; warnings: string[];
+}
+export interface ColorToken { role: string; hex: string; stability: Stability; freq: number }
+export interface Tokens {
+  colors: ColorToken[];
+  typography: { fontSans: string; contrast: string; scale: Array<{ role: string; px: number; w: number; lh: number }> };
+  space: { unit: number; density: string; scale: number[] };
+  radius: { tendency: string; sm: number; md: number; lg: number };
+  shadow: { weight: string; md: string };
+}
+export interface Draft { id: string; name: string; url: string; extractedAt: string; tokens: Tokens; theme: Record<string, string>; warnings: string[]; rawPath: string }
+export interface Judgment { primary: StyleName; secondary: StyleName | null; descriptors: string[]; thesis: string }
+export interface SiteRecord extends Draft { style: Judgment; screenshot: string; fidelity?: { coverage: number; eligibleRatio: number; mean: number; p95: number } }

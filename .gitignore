@@ -1,0 +1,5 @@
+node_modules/
+.style-extractor/
+.playwright-cli/
+.DS_Store
+*.log

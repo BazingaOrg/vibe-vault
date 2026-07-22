@@ -1,0 +1,25 @@
+{
+  "name": "vibe-vault",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "extract": "tsx skill/scripts/extract.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/**/*.test.ts"
+  },
+  "dependencies": {
+    "culori": "^4.0.1",
+    "playwright": "^1.54.2",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/culori": "^4.0.1",
+    "@types/node": "^22.15.3",
+    "@types/pngjs": "^6.0.5",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
