@@ -1,16 +1,9 @@
 [
   {
-    "id": "example-com",
-    "name": "Example-Com",
-    "url": "https://example.com",
-    "primaryStyle": "Minimalism",
-    "accent": ""
-  },
-  {
-    "id": "stripe",
-    "name": "Stripe",
-    "url": "https://stripe.com",
-    "primaryStyle": "Minimalism",
-    "accent": "#635bff"
+    "id": "codex-resets-com",
+    "name": "Codex Resets",
+    "url": "https://codex-resets.com/",
+    "primaryStyle": "Neo-Brutalism",
+    "accent": "#ff5c2b"
   }
 ]

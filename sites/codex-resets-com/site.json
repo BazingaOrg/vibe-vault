@@ -1,0 +1,142 @@
+{
+  "id": "codex-resets-com",
+  "name": "Codex Resets",
+  "url": "https://codex-resets.com/",
+  "extractedAt": "2026-07-22",
+  "tokens": {
+    "colors": [
+      {
+        "role": "背景 bg",
+        "hex": "#fff4dd",
+        "stability": "L1",
+        "freq": 0.229
+      },
+      {
+        "role": "surface",
+        "hex": "#ffd84d",
+        "stability": "L2",
+        "freq": 0.004
+      },
+      {
+        "role": "text",
+        "hex": "#000000",
+        "stability": "L1",
+        "freq": 0.447
+      },
+      {
+        "role": "muted",
+        "hex": "#26201a",
+        "stability": "L1",
+        "freq": 0.218
+      },
+      {
+        "role": "accent",
+        "hex": "#ff5c2b",
+        "stability": "L1",
+        "freq": 0.042
+      },
+      {
+        "role": "border",
+        "hex": "#877b6b",
+        "stability": "L1",
+        "freq": 0.048
+      }
+    ],
+    "typography": {
+      "fontSans": "\"Baloo 2\", \"Arial Rounded MT Bold\", system-ui, sans-serif",
+      "contrast": "高对比",
+      "scale": [
+        {
+          "role": "H5",
+          "px": 17,
+          "w": 400,
+          "lh": 1.55
+        },
+        {
+          "role": "H4",
+          "px": 24,
+          "w": 800,
+          "lh": 1.55
+        },
+        {
+          "role": "H3",
+          "px": 30,
+          "w": 700,
+          "lh": 1.1
+        },
+        {
+          "role": "H2",
+          "px": 36,
+          "w": 800,
+          "lh": 1.05
+        },
+        {
+          "role": "H1",
+          "px": 68,
+          "w": 800,
+          "lh": 1.05
+        }
+      ]
+    },
+    "space": {
+      "unit": 4,
+      "density": "紧凑",
+      "scale": [
+        2,
+        4,
+        8,
+        10,
+        14,
+        16,
+        18,
+        20
+      ]
+    },
+    "radius": {
+      "tendency": "偏圆润",
+      "sm": 3,
+      "md": 10,
+      "lg": 999
+    },
+    "shadow": {
+      "weight": "有",
+      "md": "rgb(38, 32, 26) 3px 3px 0px 0px"
+    }
+  },
+  "theme": {
+    "--tk-font-sans": "\"Baloo 2\", \"Arial Rounded MT Bold\", system-ui, sans-serif",
+    "--tk-font-display": "\"Baloo 2\", \"Arial Rounded MT Bold\", system-ui, sans-serif",
+    "--tk-radius": "10px",
+    "--tk-btn-radius": "3px",
+    "--tk-shadow": "rgb(38, 32, 26) 3px 3px 0px 0px",
+    "--tk-btn-shadow": "rgb(38, 32, 26) 3px 3px 0px 0px",
+    "--tk-space": "4px",
+    "--tk-btn-border": "transparent",
+    "--tk-bg": "#fff4dd",
+    "--tk-surface": "#ffd84d",
+    "--tk-text": "#000000",
+    "--tk-muted": "#26201a",
+    "--tk-accent": "#ff5c2b",
+    "--tk-border": "#877b6b"
+  },
+  "warnings": [],
+  "rawPath": "raw.json",
+  "style": {
+    "primary": "Neo-Brutalism",
+    "secondary": "Playful-Illustrative",
+    "descriptors": [
+      "chunky",
+      "playful",
+      "warm",
+      "data-forward"
+    ],
+    "thesis": "采用温暖奶油底色、厚重黑色字形与高饱和点缀，形成轻松而鲜明的新粗野主义气质。用硬边描线、无模糊的偏移阴影和少量圆角强化触感，让数据表达直接但不冷峻。保持中性色彩占主导，黄色与橙红只承担关键状态，避免柔和渐变和精致玻璃质感。"
+  },
+  "screenshot": "screenshot.png",
+  "fidelity": {
+    "coverage": 0.954,
+    "eligibleRatio": 0.998,
+    "mean": 0.013,
+    "p95": 0.052
+  }
+}
