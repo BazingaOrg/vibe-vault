@@ -1,0 +1,16 @@
+[
+  {
+    "id": "example-com",
+    "name": "Example-Com",
+    "url": "https://example.com",
+    "primaryStyle": "Minimalism",
+    "accent": ""
+  },
+  {
+    "id": "stripe",
+    "name": "Stripe",
+    "url": "https://stripe.com",
+    "primaryStyle": "Minimalism",
+    "accent": "#635bff"
+  }
+]
