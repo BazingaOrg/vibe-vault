@@ -1,0 +1,142 @@
+{
+  "id": "yeguozi-com",
+  "name": "Yeguozi",
+  "url": "https://www.yeguozi.com/",
+  "extractedAt": "2026-07-22",
+  "tokens": {
+    "colors": [
+      {
+        "role": "背景 bg",
+        "hex": "#14181e",
+        "stability": "L1",
+        "freq": 0.1
+      },
+      {
+        "role": "surface",
+        "hex": "#31353a",
+        "stability": "L1",
+        "freq": 0.019
+      },
+      {
+        "role": "text",
+        "hex": "#f5f3ee",
+        "stability": "L1",
+        "freq": 0.822
+      },
+      {
+        "role": "muted",
+        "hex": "#6b6964",
+        "stability": "L1",
+        "freq": 0.015
+      },
+      {
+        "role": "accent",
+        "hex": "#c9a96e",
+        "stability": "L2",
+        "freq": 0.003
+      },
+      {
+        "role": "border",
+        "hex": "#31353a",
+        "stability": "L1",
+        "freq": 0.019
+      }
+    ],
+    "typography": {
+      "fontSans": "\"Helvetica Neue\", Helvetica, \"Segoe UI\", system-ui, -apple-system, Arial, sans-serif, \"PingFang SC\", \"Microsoft YaHei\"",
+      "contrast": "高对比",
+      "scale": [
+        {
+          "role": "H5",
+          "px": 18,
+          "w": 400,
+          "lh": 1.38
+        },
+        {
+          "role": "H4",
+          "px": 24,
+          "w": 400,
+          "lh": 1.33
+        },
+        {
+          "role": "H3",
+          "px": 34,
+          "w": 400,
+          "lh": 1.5
+        },
+        {
+          "role": "H2",
+          "px": 48,
+          "w": 400,
+          "lh": 1.12
+        },
+        {
+          "role": "H1",
+          "px": 108,
+          "w": 500,
+          "lh": 1.5
+        }
+      ]
+    },
+    "space": {
+      "unit": 4,
+      "density": "紧凑",
+      "scale": [
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16
+      ]
+    },
+    "radius": {
+      "tendency": "较克制",
+      "sm": 4,
+      "md": 6,
+      "lg": 33554400
+    },
+    "shadow": {
+      "weight": "有",
+      "md": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.07) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px"
+    }
+  },
+  "theme": {
+    "--tk-font-sans": "\"Helvetica Neue\", Helvetica, \"Segoe UI\", system-ui, -apple-system, Arial, sans-serif, \"PingFang SC\", \"Microsoft YaHei\"",
+    "--tk-font-display": "\"Helvetica Neue\", Helvetica, \"Segoe UI\", system-ui, -apple-system, Arial, sans-serif, \"PingFang SC\", \"Microsoft YaHei\"",
+    "--tk-radius": "6px",
+    "--tk-btn-radius": "4px",
+    "--tk-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.07) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px",
+    "--tk-btn-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.07) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px",
+    "--tk-space": "4px",
+    "--tk-btn-border": "transparent",
+    "--tk-bg": "#14181e",
+    "--tk-surface": "#31353a",
+    "--tk-text": "#f5f3ee",
+    "--tk-muted": "#6b6964",
+    "--tk-accent": "#c9a96e",
+    "--tk-border": "#31353a"
+  },
+  "warnings": [],
+  "rawPath": "raw.json",
+  "style": {
+    "primary": "Editorial",
+    "secondary": "Luxury-Elegant",
+    "descriptors": [
+      "电影感",
+      "克制典雅",
+      "高对比",
+      "哑金点缀"
+    ],
+    "thesis": "以深墨黑中性色为基底，用暖白正文、低亮灰辅助信息与少量哑金形成清晰而克制的层级。醒目文字采用具有人文气质的衬线字体，辅助文字保持简洁无衬线，结合细边框、轻微圆角和近乎无外投影的处理，营造安静、典雅且富有电影感的编辑风格。"
+  },
+  "screenshot": "screenshot.png",
+  "fidelity": {
+    "coverage": 0.782,
+    "eligibleRatio": 0.4,
+    "mean": 0.031,
+    "p95": 0.106
+  }
+}

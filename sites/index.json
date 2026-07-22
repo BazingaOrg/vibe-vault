@@ -5,5 +5,12 @@
     "url": "https://codex-resets.com/",
     "primaryStyle": "Neo-Brutalism",
     "accent": "#ff5c2b"
+  },
+  {
+    "id": "yeguozi-com",
+    "name": "Yeguozi",
+    "url": "https://www.yeguozi.com/",
+    "primaryStyle": "Editorial",
+    "accent": "#c9a96e"
   }
 ]
