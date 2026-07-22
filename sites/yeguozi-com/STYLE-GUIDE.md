@@ -1,8 +1,4 @@
-# STYLE-GUIDE · Yeguozi
-
-> 用途：汇总可迁移的风格方向、视觉参数与 CSS，可直接作为设计或编码提示词。
->
-> 迁移边界：仅复用稳定的视觉 token 与关系；不复刻原站布局、组件、内容或交互结构。
+# STYLE-GUIDE
 
 ## 风格方向
 主风格：Editorial · 次风格：Luxury-Elegant
@@ -30,9 +26,9 @@
 
 ## 间距与形态
 - 间距基准：4px；整体密度：紧凑。
-- 已采集间距：2px / 4px / 6px / 8px / 10px / 12px / 14px / 16px。
+- 间距阶梯：2px / 4px / 6px / 8px / 10px / 12px / 14px / 16px。
 - 圆角：较克制（4px / 6px / 33554400px）。
-- 阴影：有，rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.07) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px。
+- 阴影：无。
 
 ## CSS
 ```css
@@ -40,7 +36,7 @@
   --tk-font-sans: "Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei";
   --tk-font-display: "Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei";
   --tk-radius: 6px;
-  --tk-shadow: rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.07) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px;
+  --tk-shadow: none;
   --tk-space: 4px;
   --tk-bg: #14181e;
   --tk-surface: #31353a;
@@ -50,8 +46,3 @@
   --tk-border: #31353a;
 }
 ```
-
-## 使用边界
-- 先保持语义色的层级与对比，再按新项目内容调整具体尺寸。
-- 将字体、字阶、间距、圆角和阴影视为一套关系，不单独套用某一个数值。
-- 未采集的信息应依据新项目语境补充，不从原站推断或复刻布局。

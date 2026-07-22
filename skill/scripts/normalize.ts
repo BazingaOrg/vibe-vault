@@ -68,6 +68,49 @@ function roleColors(clusters: Cluster[]): ColorToken[] {
 }
 const median = (v: number[]) => { const x=[...v].sort((a,b)=>a-b); return x[Math.floor(x.length/2)] ?? 0; };
 const unique = (v: number[]) => [...new Set(v.filter((n) => Number.isFinite(n) && n > 0).map((n) => Math.round(n)))].sort((a,b)=>a-b);
+export function splitShadowLayers(value: string): string[] {
+  const layers: string[] = []; let start = 0, depth = 0, quote = "", escaped = false;
+  for (let index = 0; index < value.length; index++) {
+    const char = value[index];
+    if (escaped) { escaped = false; continue; }
+    if (quote) { if (char === "\\") escaped = true; else if (char === quote) quote = ""; continue; }
+    if (char === '"' || char === "'") { quote = char; continue; }
+    if (char === "(") depth++; else if (char === ")") depth = Math.max(0, depth - 1);
+    else if (char === "," && depth === 0) { layers.push(value.slice(start, index).trim()); start = index + 1; }
+  }
+  const last = value.slice(start).trim(); if (last) layers.push(last); return layers;
+}
+function shadowColor(layer: string): string | null {
+  const candidates = layer.match(/(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^)]*\)|#[0-9a-f]{3,8}\b|\b[a-z]+\b/gi) ?? [];
+  for (const candidate of candidates) { const color = parse(candidate); if (color) return candidate; }
+  return null;
+}
+function visibleShadowLayer(layer: string): boolean {
+  if (!layer || /\binset\b/i.test(layer)) return false;
+  const color = shadowColor(layer); const parsed = color ? parse(color) : null;
+  if (!parsed || (parsed.alpha ?? 1) <= .01) return false;
+  const withoutColor = color ? layer.replace(color, " ") : layer;
+  const lengths = withoutColor.match(/[-+]?(?:\d*\.\d+|\d+\.?)(?:e[-+]?\d+)?(?:[a-z%]+)?/gi) ?? [];
+  const [x = 0, y = 0, blur = 0] = lengths.map(Number.parseFloat);
+  return x !== 0 || y !== 0 || blur > 0;
+}
+export function normalizeShadow(value: string | undefined): string {
+  if (!value || value === "none") return "none";
+  const layers = splitShadowLayers(value).filter(visibleShadowLayer);
+  return layers.length ? layers.join(", ") : "none";
+}
+function representativeShadow(samples: RawSample[]): string {
+  const candidates = new Map<string, { count: number; area: number; first: number; control: boolean }>();
+  samples.forEach((sample, index) => {
+    const shadow = normalizeShadow(sample.shadow); if (shadow === "none") return;
+    const area = Math.max(1, sample.rect.width * sample.rect.height);
+    const current = candidates.get(shadow) ?? { count: 0, area: 0, first: index, control: false };
+    current.count++; current.area += area;
+    current.control ||= (sample.tag === "button" || sample.tag === "a") && area >= 1024;
+    candidates.set(shadow, current);
+  });
+  return [...candidates.entries()].sort((a, b) => Number(b[1].control) - Number(a[1].control) || b[1].count - a[1].count || b[1].area - a[1].area || a[1].first - b[1].first)[0]?.[0] ?? "none";
+}
 function usableFont(sample: RawSample): boolean { return Boolean(sample.fontFamily?.trim()) && Number.isFinite(sample.fontSize) && sample.fontSize > 0; }
 function primaryFont(raw: RawExtraction, samples: RawSample[]): string {
   const weights = new Map<string, { weight: number; first: number }>();
@@ -95,7 +138,7 @@ export function normalize(raw: RawExtraction): Draft {
   const type = unique(samples.map(s=>s.fontSize)).slice(-5); const scale = type.map((px, i) => { const set=samples.filter(s=>Math.round(s.fontSize)===px); return { role: i===type.length-1 ? "H1" : px <= 16 ? "Body" : `H${type.length-i}`, px, w: Math.round(median(set.map(s=>s.fontWeight)) || 400), lh: Number(((median(set.map(s=>s.lineHeight)) || px*1.4)/px).toFixed(2)) }; });
   const spacings = unique(samples.flatMap(s=>s.spacing)).slice(0,8); const unit = spacings.find(x=>x >= 4 && x <= 12) ?? 8;
   const radii = unique(samples.map(s=>s.radius)); const radius = { tendency: (median(radii) >= 8 ? "偏圆润" : "较克制"), sm: radii[0] ?? 0, md: Math.round(median(radii)), lg: radii.at(-1) ?? 0 };
-  const shadow = samples.map(s=>s.shadow).find(s=>s && s !== "none") ?? "none";
+  const shadow = representativeShadow(samples);
   const textColor = colors.find(c=>c.role==="text")?.hex, muted = colors.find(c=>c.role==="muted")?.hex, bg = colors.find(c=>c.role==="背景 bg")?.hex, surface=colors.find(c=>c.role==="surface")?.hex, accent=colors.find(c=>c.role==="accent")?.hex, border=colors.find(c=>c.role==="border")?.hex;
   const theme: Record<string,string> = { "--tk-font-sans": font, "--tk-font-display": font, "--tk-radius": `${radius.md}px`, "--tk-btn-radius": `${radius.sm}px`, "--tk-shadow": shadow, "--tk-btn-shadow": shadow, "--tk-space": `${unit}px`, "--tk-btn-border": "transparent" };
   for (const [k,v] of Object.entries({"--tk-bg":bg,"--tk-surface":surface,"--tk-text":textColor,"--tk-muted":muted,"--tk-accent":accent,"--tk-border":border})) if (v) theme[k]=v;

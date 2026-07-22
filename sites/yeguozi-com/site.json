@@ -99,8 +99,8 @@
       "lg": 33554400
     },
     "shadow": {
-      "weight": "有",
-      "md": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.07) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px"
+      "weight": "无",
+      "md": "none"
     }
   },
   "theme": {
@@ -108,8 +108,8 @@
     "--tk-font-display": "\"Helvetica Neue\", Helvetica, \"Segoe UI\", system-ui, -apple-system, Arial, sans-serif, \"PingFang SC\", \"Microsoft YaHei\"",
     "--tk-radius": "6px",
     "--tk-btn-radius": "4px",
-    "--tk-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.07) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px",
-    "--tk-btn-shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.07) 0px 1px 0px 0px inset, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px",
+    "--tk-shadow": "none",
+    "--tk-btn-shadow": "none",
     "--tk-space": "4px",
     "--tk-btn-border": "transparent",
     "--tk-bg": "#14181e",
