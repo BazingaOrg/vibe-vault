@@ -1,5 +1,7 @@
 # vibe-vault
 
+中文名为 **Vibe Vault（风格收藏册）**。
+
 记录喜欢的网站设计风格，积累审美，也为未来项目沉淀可复用的视觉方向。提取的是可迁移的视觉 token 与风格原则，不复刻原网站的布局、组件或 DOM 结构。
 
 ## Features
@@ -49,4 +51,4 @@ npm run extract -- collect <url>
 npm run extract -- finalize <id>
 ```
 
-完成后，脚本会覆盖同一主机的既有记录，写入 `sites/<id>/` 并更新排序后的 `sites/index.json`。采集不足、受保护或动态页面会保留为 `warnings`；不要补造缺失 token。
+完成后，脚本会覆盖同一主机的既有记录，写入 `sites/<id>/` 并更新按采集日期倒序的 `sites/index.json`。索引只保存画廊卡片所需的 `id`、名称、URL、主/次风格、描述词、强调色、采集日期和 `partial`；完整 token 与文档仍按点选懒加载。`partial` 只由 `warnings` 是否存在推导。采集不足、受保护或动态页面会保留为 `warnings`；不要补造缺失 token。

@@ -9,11 +9,32 @@ import { tmpdir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 import type { RawExtraction } from "../skill/scripts/schema.js";
+// @ts-expect-error Browser helpers intentionally stay dependency-free JavaScript.
+import { contrastRatio, fontStackSummary, foregroundFor, previewBackdropFor, splitFontStack } from "../assets/theme.js";
+// @ts-expect-error Browser renderer intentionally stays dependency-free JavaScript.
+import { colorPreview } from "../assets/render.js";
 const base: RawExtraction={url:"https://www.example.com/x",id:"example-com",collectedAt:"2026-07-22T00:00:00Z",viewport:{width:1440,height:900},rootVariables:{},mediaRects:[],warnings:[],samples:[
  {tag:"body",root:true,text:false,media:false,rect:{x:0,y:0,width:1440,height:900},colors:{backgroundColor:"rgb(255,255,255)",color:"rgb(12, 20, 33)",borderColor:"rgba(0, 0, 0, 0)"},fontFamily:"Inter, sans-serif",fontSize:16,fontWeight:400,lineHeight:24,radius:0,shadow:"none",spacing:[8,16]},
  ...Array.from({length:10},(_,i)=>({tag:"a",text:true,media:false,rect:{x:i*10,y:20,width:100,height:30},colors:{backgroundColor:"rgba(0, 0, 0, 0)",color:"rgb(98, 91, 255)",borderColor:"rgb(230, 235, 241)"},fontFamily:"Inter, sans-serif",fontSize:16,fontWeight:500,lineHeight:24,radius:8,shadow:"0 2px 8px rgba(10,37,64,.08)",spacing:[8,16]}))
 ]};
 test("normalizes a stable palette and theme",()=>{ const d=normalize(base); assert.equal(d.id,"example-com"); assert.ok(d.tokens.colors.some(c=>c.role==="背景 bg")); assert.ok(d.theme["--tk-bg"]); assert.equal(d.tokens.space.unit,8); assert.ok(clusterColors(base).length>=3); });
+test("preview helpers keep same-colour roles readable and preserve real border paint",()=>{
+ assert.equal(previewBackdropFor("#31353a","#14181e","#31353a"),"#fff");
+ assert.ok(contrastRatio("#31353a",previewBackdropFor("#31353a","#14181e","#31353a"))>=3);
+ assert.equal(previewBackdropFor("#777777",undefined,undefined),"#000");
+ assert.equal(foregroundFor("#c9a96e","#f5f3ee"),"#000");
+ const border=colorPreview("边框","border","#31353a","#f5f3ee","#14181e","#31353a");
+ assert.match(border,/type="button" class="swatch swatch--border"/); assert.match(border,/class="sample-border" style="border-color:#31353a"/); assert.doesNotMatch(border,/style="[^"]*;color:#31353a/);
+ const accent=colorPreview("强调色","accent","#c9a96e","#f5f3ee","#14181e","#31353a");
+ assert.match(accent,/sample-action/); assert.match(accent,/color:#000/);
+});
+test("copy controls use explicit native buttons",()=>{ assert.match(colorPreview("正文","text","#111111","#111111","#ffffff","#eeeeee"),/^<button type="button"/); });
+test("font stack summaries are quote and escape aware without changing source values",()=>{
+ const yeguozi='"Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei"';
+ assert.equal(fontStackSummary(yeguozi),"主要字体 · Helvetica Neue（另 8 个回退）"); assert.equal(yeguozi,'"Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei"');
+ assert.deepEqual(splitFontStack('"A, B", "C\\\\, D", serif'),['"A, B"','"C\\\\, D"','serif']);
+ assert.equal(fontStackSummary("Inter"),"主要字体 · Inter"); assert.equal(fontStackSummary(""),"未采集字体栈"); assert.equal(fontStackSummary(undefined),"未采集字体栈"); assert.doesNotThrow(()=>splitFontStack('"unterminated, serif'));
+});
 test("uses stable background evidence instead of mixed foreground area",()=>{
  const foreground={tag:"a",text:true,media:false,rect:{x:0,y:0,width:1440,height:800},colors:{color:"rgb(245, 243, 238)"},fontFamily:"Inter",fontSize:16,fontWeight:400,lineHeight:24,radius:0,shadow:"none",spacing:[]};
  const raw:RawExtraction={...base,samples:[
