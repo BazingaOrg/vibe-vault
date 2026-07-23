@@ -1,6 +1,6 @@
 import { copyFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { STYLE_VOCABULARY, type Draft, type Judgment, type SiteRecord } from "./schema.js";
+import { STYLE_VOCABULARY, type Draft, type IndexEntry, type Judgment, type SiteRecord } from "./schema.js";
 import { fidelity } from "./verify.js";
 const legal = new Set<string>(STYLE_VOCABULARY);
 export function validateJudgment(value: unknown): Judgment {
@@ -23,6 +23,17 @@ const COLOR_ROLES: Record<string, string[]> = {
 function color(site: SiteRecord, role: keyof typeof COLOR_ROLES): string {
   return site.tokens.colors.find((token) => COLOR_ROLES[role].includes(token.role))?.hex ?? "未确定";
 }
+export function indexEntry(record: SiteRecord): IndexEntry {
+  return {
+    id: record.id, name: record.name, url: record.url,
+    primaryStyle: record.style.primary, secondaryStyle: record.style.secondary,
+    descriptors: record.style.descriptors, accent: color(record, "accent") === "未确定" ? "" : color(record, "accent"),
+    extractedAt: record.extractedAt, partial: record.warnings.length > 0,
+  };
+}
+export function sortIndex(entries: IndexEntry[]): IndexEntry[] {
+  return [...entries].sort((a,b)=>b.extractedAt.localeCompare(a.extractedAt)||a.name.localeCompare(b.name)||a.id.localeCompare(b.id));
+}
 export function guide(site: SiteRecord): string {
   const t = site.tokens;
   const scale = [...t.typography.scale].sort((a, b) => a.px - b.px);
@@ -37,6 +48,6 @@ export async function finalize(draft: Draft, judgment: unknown, workDir=process.
   const record:SiteRecord={...draft,style,screenshot:"screenshot.png"};
   try { record.fidelity=await fidelity(screenshot,raw,record.tokens); if(record.fidelity.coverage<.65 || record.fidelity.eligibleRatio<.2) record.warnings=[...record.warnings,`调色板保真覆盖率 ${record.fidelity.coverage}（阈值 0.65），结果仅供参考。`]; } catch { record.warnings=[...record.warnings,"无法完成截图保真校验，结果仅供参考。"] }
   const target=path.join(workDir,"sites",draft.id); await mkdir(target,{recursive:true}); await copyFile(screenshot,path.join(target,"screenshot.png")); await atomicJson(path.join(target,"site.json"),record); await writeFile(path.join(target,"STYLE-GUIDE.md"),guide(record));
-  const indexFile=path.join(workDir,"sites","index.json"); let index:Array<Record<string,string>>=[]; try { index=JSON.parse(await readFile(indexFile,"utf8")); } catch { /* initialized below */ }
-  const entry={id:record.id,name:record.name,url:record.url,primaryStyle:record.style.primary,accent:record.tokens.colors.find(x=>x.role==="accent")?.hex ?? ""}; index=[...index.filter(x=>x.id!==record.id),entry].sort((a,b)=>a.name.localeCompare(b.name)); await atomicJson(indexFile,index); return record;
+  const indexFile=path.join(workDir,"sites","index.json"); let index:IndexEntry[]=[]; try { index=JSON.parse(await readFile(indexFile,"utf8")); } catch { /* initialized below */ }
+  index=sortIndex([...index.filter(x=>x.id!==record.id),indexEntry(record)]); await atomicJson(indexFile,index); return record;
 }

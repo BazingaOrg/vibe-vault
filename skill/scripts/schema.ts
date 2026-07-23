@@ -27,3 +27,9 @@ export interface Tokens {
 export interface Draft { id: string; name: string; url: string; extractedAt: string; tokens: Tokens; theme: Record<string, string>; warnings: string[]; rawPath: string }
 export interface Judgment { primary: StyleName; secondary: StyleName | null; descriptors: string[]; thesis: string }
 export interface SiteRecord extends Draft { style: Judgment; screenshot: string; fidelity?: { coverage: number; eligibleRatio: number; mean: number; p95: number } }
+/** The complete, index-only data needed to render a gallery card. */
+export interface IndexEntry {
+  id: string; name: string; url: string;
+  primaryStyle: StyleName; secondaryStyle: StyleName | null;
+  descriptors: string[]; accent: string; extractedAt: string; partial: boolean;
+}

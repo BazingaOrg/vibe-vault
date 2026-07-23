@@ -1,5 +1,7 @@
 # 网站设计风格收藏册 · 实施方案（交给 AI 在新 repo 实现）
 
+> 历史设计记录（2026-07-23）：其中的五字段 `index.json` 示例已被 `IndexEntry` 九字段画廊契约替代；以 `skill/SKILL.md` 和 `skill/scripts/schema.ts` 为准。
+
 > 这份文档是给编码 agent（Codex / Claude Code）的实现规格。照着 §10 的顺序做即可。
 > 配套参考实现：`style-gallery-prototype.html`（前端结构 + 数据模型的活样例，直接照抄结构）。
 

@@ -97,7 +97,7 @@ sites/<id>/STYLE-GUIDE.md
 sites/index.json
 ```
 
-Verify that the record has the expected URL and ID, the four judgment fields survive validation, `screenshot` is `screenshot.png`, the three site artifacts exist, and `sites/index.json` has exactly one entry for the ID with matching name, URL, primary style, and accent when available.
+Verify that the record has the expected URL and ID, the four judgment fields survive validation, `screenshot` is `screenshot.png`, the three site artifacts exist, and `sites/index.json` has exactly one entry for the ID. Its gallery contract is `id`, `name`, `url`, `primaryStyle`, `secondaryStyle`, `descriptors`, `accent`, `extractedAt`, and `partial`; `partial` is true exactly when the record has warnings. The index is ordered by `extractedAt` descending, then name and ID for a stable same-day order. Accent supports legacy semantic role labels such as `强调 accent`.
 
 Report any `warnings` exactly as warnings, especially “可用稳定色不足”, collection failures, or palette-fidelity results. A fidelity warning is raised when palette coverage is below 0.65 or the non-media eligible ratio is below 0.2 (or when fidelity cannot be calculated). Palette coverage compares screenshot pixels to extracted colors while excluding recorded media rectangles; it is **not** pixel-perfect layout fidelity and does not prove the source page was reproduced.
 

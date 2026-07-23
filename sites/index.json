@@ -4,13 +4,21 @@
     "name": "Codex Resets",
     "url": "https://codex-resets.com/",
     "primaryStyle": "Neo-Brutalism",
-    "accent": "#ff5c2b"
+    "secondaryStyle": "Playful-Illustrative",
+    "descriptors": ["chunky", "playful", "warm", "data-forward"],
+    "accent": "#ff5c2b",
+    "extractedAt": "2026-07-22",
+    "partial": false
   },
   {
     "id": "yeguozi-com",
     "name": "Yeguozi",
     "url": "https://www.yeguozi.com/",
     "primaryStyle": "Editorial",
-    "accent": "#c9a96e"
+    "secondaryStyle": "Luxury-Elegant",
+    "descriptors": ["电影感", "克制典雅", "高对比", "哑金点缀"],
+    "accent": "#c9a96e",
+    "extractedAt": "2026-07-22",
+    "partial": false
   }
 ]
