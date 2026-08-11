@@ -5,20 +5,52 @@
     "url": "https://codex-resets.com/",
     "primaryStyle": "Neo-Brutalism",
     "secondaryStyle": "Playful-Illustrative",
-    "descriptors": ["chunky", "playful", "warm", "data-forward"],
+    "descriptors": [
+      "厚实",
+      "俏皮",
+      "温暖",
+      "直接"
+    ],
     "accent": "#ff5c2b",
-    "extractedAt": "2026-07-22",
-    "partial": false
+    "extractedAt": "2026-08-11",
+    "partial": false,
+    "validationFlags": []
+  },
+  {
+    "id": "historyofmarket-com",
+    "name": "Historyofmarket",
+    "url": "https://historyofmarket.com/",
+    "primaryStyle": "Editorial",
+    "secondaryStyle": "Minimalism",
+    "descriptors": [
+      "刊物感",
+      "严谨",
+      "克制",
+      "档案气质",
+      "纸墨分明"
+    ],
+    "accent": "#52c6c0",
+    "extractedAt": "2026-08-11",
+    "partial": false,
+    "validationFlags": []
   },
   {
     "id": "yeguozi-com",
     "name": "Yeguozi",
-    "url": "https://www.yeguozi.com/",
+    "url": "https://yeguozi.com/",
     "primaryStyle": "Editorial",
     "secondaryStyle": "Luxury-Elegant",
-    "descriptors": ["电影感", "克制典雅", "高对比", "哑金点缀"],
+    "descriptors": [
+      "电影感",
+      "克制典雅",
+      "高对比",
+      "哑金点缀"
+    ],
     "accent": "#c9a96e",
-    "extractedAt": "2026-07-22",
-    "partial": false
+    "extractedAt": "2026-08-11",
+    "partial": false,
+    "validationFlags": [
+      "media-heavy"
+    ]
   }
 ]

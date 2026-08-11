@@ -1,0 +1,251 @@
+{
+  "id": "historyofmarket-com",
+  "name": "Historyofmarket",
+  "url": "https://historyofmarket.com/",
+  "extractedAt": "2026-08-11",
+  "tokens": {
+    "colors": [
+      {
+        "role": "背景 bg",
+        "hex": "#ffffff",
+        "stability": "L1",
+        "freq": 0.204
+      },
+      {
+        "role": "surface",
+        "hex": "#f0f4f1",
+        "stability": "L1",
+        "freq": 0.204
+      },
+      {
+        "role": "text",
+        "hex": "#181822",
+        "stability": "L1",
+        "freq": 0.1
+      },
+      {
+        "role": "muted",
+        "hex": "#5c5c65",
+        "stability": "L1",
+        "freq": 0.1
+      },
+      {
+        "role": "accent",
+        "hex": "#52c6c0",
+        "stability": "L2",
+        "freq": 0.009
+      },
+      {
+        "role": "border",
+        "hex": "#c6cecd",
+        "stability": "L1",
+        "freq": 0.088
+      }
+    ],
+    "typography": {
+      "fontSans": "\"Literata HOM\", \"PingFang SC\", \"Microsoft YaHei\", \"Hiragino Sans GB\", \"Noto Sans SC\", \"Heiti SC\", system-ui, sans-serif",
+      "contrast": "高对比",
+      "scale": [
+        {
+          "role": "Body",
+          "px": 16,
+          "w": 400,
+          "lh": 1.55
+        },
+        {
+          "role": "Lead",
+          "px": 19,
+          "w": 400,
+          "lh": 1.74
+        },
+        {
+          "role": "H3",
+          "px": 30,
+          "w": 600,
+          "lh": 1.1
+        },
+        {
+          "role": "H2",
+          "px": 52,
+          "w": 700,
+          "lh": 1.06
+        },
+        {
+          "role": "H1",
+          "px": 72,
+          "w": 900,
+          "lh": 0.92
+        }
+      ]
+    },
+    "space": {
+      "unit": 4,
+      "density": "紧凑",
+      "scale": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10
+      ]
+    },
+    "radius": {
+      "tendency": "较克制",
+      "sm": 2,
+      "md": 2,
+      "lg": 2
+    },
+    "shadow": {
+      "weight": "有",
+      "md": "rgb(255, 255, 255) -8px 0px 12px -4px, rgb(198, 206, 205) 0px 1px 0px 0px"
+    }
+  },
+  "visualGrammar": {
+    "typography": {
+      "display": {
+        "value": {
+          "family": "\"HOM Nameplate Lg\", Georgia, serif",
+          "size": 72,
+          "weight": 900,
+          "lineHeight": 0.92,
+          "letterSpacing": -1.58,
+          "fontStyle": "normal",
+          "textTransform": "none"
+        },
+        "source": "measured",
+        "confidence": "high"
+      },
+      "body": {
+        "value": {
+          "family": "\"Literata HOM\", \"PingFang SC\", \"Microsoft YaHei\", \"Hiragino Sans GB\", \"Noto Sans SC\", \"Heiti SC\", system-ui, sans-serif",
+          "size": 19,
+          "weight": 400,
+          "lineHeight": 1.74,
+          "letterSpacing": 0.04,
+          "fontStyle": "normal",
+          "textTransform": "none"
+        },
+        "source": "measured",
+        "confidence": "high"
+      },
+      "meta": {
+        "value": {
+          "family": "\"HOM Figure\", \"Apparatus HOM\", \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif",
+          "size": 10,
+          "weight": 400,
+          "lineHeight": 1.55,
+          "letterSpacing": 1,
+          "fontStyle": "normal",
+          "textTransform": "none"
+        },
+        "source": "measured",
+        "confidence": "high"
+      },
+      "pairing": {
+        "value": "展示字体与正文字体形成对照",
+        "source": "inferred",
+        "confidence": "high"
+      }
+    },
+    "palette": {
+      "mode": {
+        "value": "浅色基底",
+        "source": "inferred",
+        "confidence": "high"
+      },
+      "allocation": {
+        "value": "背景与承载面分层，中性色占主导",
+        "source": "inferred",
+        "confidence": "high"
+      },
+      "accentRule": {
+        "value": "强调色少量点缀",
+        "source": "inferred",
+        "confidence": "medium"
+      }
+    },
+    "stroke": {
+      "value": {
+        "widths": [
+          1,
+          2
+        ],
+        "primary": 1,
+        "style": "solid",
+        "character": "细线与强调描边并用"
+      },
+      "source": "measured",
+      "confidence": "high"
+    },
+    "surface": {
+      "value": "背景与承载面分层，中性色占主导",
+      "source": "inferred",
+      "confidence": "high"
+    },
+    "elevation": {
+      "value": "柔和扩散阴影",
+      "source": "measured",
+      "confidence": "high"
+    },
+    "shape": {
+      "value": "克制小圆角",
+      "source": "inferred",
+      "confidence": "high"
+    },
+    "spacing": {
+      "value": "紧凑节奏",
+      "source": "inferred",
+      "confidence": "medium"
+    },
+    "elementTraits": [
+      "字体角色对照",
+      "细线与强调描边并用",
+      "柔和扩散层次",
+      "浅色基底",
+      "分层表面",
+      "克制小圆角"
+    ]
+  },
+  "theme": {
+    "--tk-font-sans": "\"Literata HOM\", \"PingFang SC\", \"Microsoft YaHei\", \"Hiragino Sans GB\", \"Noto Sans SC\", \"Heiti SC\", system-ui, sans-serif",
+    "--tk-font-display": "\"HOM Nameplate Lg\", Georgia, serif",
+    "--tk-radius": "2px",
+    "--tk-btn-radius": "2px",
+    "--tk-shadow": "rgb(255, 255, 255) -8px 0px 12px -4px, rgb(198, 206, 205) 0px 1px 0px 0px",
+    "--tk-btn-shadow": "rgb(255, 255, 255) -8px 0px 12px -4px, rgb(198, 206, 205) 0px 1px 0px 0px",
+    "--tk-space": "4px",
+    "--tk-btn-border": "transparent",
+    "--tk-bg": "#ffffff",
+    "--tk-surface": "#f0f4f1",
+    "--tk-text": "#181822",
+    "--tk-muted": "#5c5c65",
+    "--tk-accent": "#52c6c0",
+    "--tk-border": "#c6cecd"
+  },
+  "warnings": [],
+  "rawPath": "raw.json",
+  "style": {
+    "primary": "Editorial",
+    "secondary": "Minimalism",
+    "descriptors": [
+      "刊物感",
+      "严谨",
+      "克制",
+      "档案气质",
+      "纸墨分明"
+    ],
+    "thesis": "以冷白纸面、近黑墨色与细发丝线建立严谨的金融刊物气质，高对比衬线字让内容具有历史档案般的分量。形态保持锐利克制，层次主要依靠明度、字重与疏密变化，强调色也回归稳定墨色。"
+  },
+  "screenshot": "screenshot.png",
+  "validationNotices": [],
+  "fidelity": {
+    "coverage": 0.957,
+    "eligibleRatio": 0.905,
+    "mean": 0.017,
+    "p95": 0.053,
+    "samples": 73281
+  }
+}
