@@ -5,20 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Vibe Vault：本地保存可迁移的网站视觉风格与设计方向。">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/styles.css">
+  <link rel="stylesheet" href="assets/styles.css?v=20260811-quality-status">
   <title>Vibe Vault · 风格收藏册</title>
 </head>
 <body>
   <main class="shell">
-    <header class="top"><div><div class="eyebrow">Personal style archive</div><h1>Vibe Vault</h1><p>收藏喜欢的网站风格，积累审美，也为下一次设计找到方向。</p></div><div class="status" id="status">正在打开收藏册…</div></header>
+    <header class="top"><div><div class="eyebrow">个人风格档案</div><h1>Vibe Vault</h1><p>收藏喜欢的网站风格，积累审美，也为下一次设计找到方向。</p></div><div class="status" id="status">正在打开收藏册…</div></header>
     <section class="section"><div class="section-title"><h2>我的收藏</h2><span id="count"></span></div><div class="filters" id="filters" hidden><div class="chips" id="chips" aria-label="按主风格筛选"></div><label class="search"><span class="sr-only">搜索收藏</span><input id="search" type="search" placeholder="搜索名称、风格或描述词"></label></div><div class="gallery" id="gallery" aria-label="收藏的网站风格" aria-busy="true"></div></section>
     <section class="section" id="detail" hidden>
-      <div class="detail"><div><div class="eyebrow" id="current-style"></div><h2 id="current-name"></h2><div class="tags" id="tags"></div><p id="thesis"></p></div><div class="facts" id="facts"></div></div>
+      <div class="detail">
+        <figure class="detail-cover"><img id="current-shot" alt="" decoding="async"></figure>
+        <div class="detail-copy"><div class="eyebrow" id="current-style"></div><h2 id="current-name" tabindex="-1"></h2><div class="tags" id="tags"></div><p id="thesis"></p></div>
+        <div class="facts" id="facts"></div>
+      </div>
+      <div class="section-title section"><h2>风格标本</h2><span>详情区完整应用目标主题</span></div>
+      <article class="specimen" id="specimen" aria-label="所选网站的合成风格标本">
+        <div class="specimen-kicker">Visual direction</div><h3 id="specimen-title">风格标题</h3><p>这是一段合成内容，用来检验字体角色、色彩层级、描边、圆角与阴影能否共同形成可迁移的视觉语言。</p>
+        <div class="specimen-rule"></div><div class="specimen-actions"><button type="button">主要操作</button><span>辅助信息 · 12:40</span></div>
+      </article>
       <div class="section-title section"><h2>核心色彩</h2><span>点击样例 · 复制色值</span></div><div class="swatches" id="swatches"></div>
       <div class="section-title section"><h2>字体与节奏</h2><span id="font-stack"></span></div><div class="grid"><article class="panel"><h3>字阶</h3><div id="type-scale"></div></article><article class="panel"><h3>间距 · <span id="density"></span></h3><div id="spaces"></div></article><article class="panel"><h3 id="shape-title">圆角 / 阴影</h3><div class="radius-samples" id="radii"></div><div class="shadow-box" id="shadow">轻量层次</div></article></div>
-      <div class="section-title section"><h2>风格文档</h2><span>完整记录 · 直接交给 AI</span></div><article class="panel code"><p class="export-help">汇总风格方向、视觉参数与 CSS，可直接作为设计或编码提示词。</p><div class="export-toolbar"><button class="copy" id="copy-code" disabled><span class="copy-label" aria-live="polite">加载文档中…</span></button></div><div class="code-frame"><pre id="code-content">正在加载 STYLE-GUIDE.md…</pre></div></article>
+      <div class="section-title section"><h2>复合视觉语法</h2><span>从 Token 到可执行风格</span></div><div class="grammar-grid" id="grammar"></div>
+      <div class="section-title section"><h2>导出</h2><button class="copy copy--primary" id="copy-code" disabled><span class="copy-label" aria-live="polite">整理中…</span></button></div>
+      <details class="panel code"><summary>查看原始 STYLE-GUIDE</summary><p class="export-help">包含风格方向、视觉参数、复合语法与 CSS，可作为设计或编码的风格基线。</p><div class="code-frame"><pre id="code-content">正在整理风格文档…</pre></div></details>
     </section>
   </main><div class="toast" id="toast" role="status"></div>
-  <script type="module" src="assets/app.js"></script>
+  <script type="module" src="assets/app.js?v=20260811-quality-status"></script>
 </body>
 </html>
