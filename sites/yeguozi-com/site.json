@@ -1,15 +1,16 @@
 {
+  "schemaVersion": 2,
   "id": "yeguozi-com",
   "name": "Yeguozi",
   "url": "https://yeguozi.com/",
-  "extractedAt": "2026-08-11",
+  "extractedAt": "2026-08-12",
   "tokens": {
     "colors": [
       {
         "role": "背景 bg",
         "hex": "#14181e",
         "stability": "L1",
-        "freq": 0.004
+        "freq": 0.003
       },
       {
         "role": "surface",
@@ -21,7 +22,7 @@
         "role": "text",
         "hex": "#f5f3ee",
         "stability": "L1",
-        "freq": 0.964
+        "freq": 0.965
       },
       {
         "role": "muted",
@@ -99,8 +100,8 @@
       "lg": 6
     },
     "shadow": {
-      "weight": "有",
-      "md": "rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px"
+      "weight": "无",
+      "md": "none"
     }
   },
   "visualGrammar": {
@@ -186,9 +187,9 @@
       "confidence": "high"
     },
     "elevation": {
-      "value": "轻柔层次阴影",
-      "source": "measured",
-      "confidence": "high"
+      "value": "平面，无外部投影",
+      "source": "inferred",
+      "confidence": "medium"
     },
     "shape": {
       "value": "克制小圆角",
@@ -212,11 +213,8 @@
     "--tk-font-sans": "\"Helvetica Neue\", Helvetica, \"Segoe UI\", system-ui, -apple-system, Arial, sans-serif, \"PingFang SC\", \"Microsoft YaHei\"",
     "--tk-font-display": "\"Cormorant Garamond\", \"Cormorant Garamond Fallback\", \"Cormorant Garamond\", \"Noto Serif SC\", \"Noto Serif SC Fallback\", \"Noto Serif SC\", \"Songti SC\", Georgia, serif",
     "--tk-radius": "4px",
-    "--tk-btn-radius": "2px",
-    "--tk-shadow": "rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
-    "--tk-btn-shadow": "rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+    "--tk-shadow": "none",
     "--tk-space": "4px",
-    "--tk-btn-border": "transparent",
     "--tk-bg": "#14181e",
     "--tk-surface": "#2f343d",
     "--tk-text": "#f5f3ee",
@@ -225,7 +223,7 @@
     "--tk-border": "#2f343d"
   },
   "warnings": [],
-  "rawPath": "raw.json",
+  "evidenceNotes": [],
   "style": {
     "primary": "Editorial",
     "secondary": "Luxury-Elegant",
@@ -235,17 +233,17 @@
       "高对比",
       "哑金点缀"
     ],
-    "thesis": "以深墨黑中性色为基底，用暖白正文、低亮灰辅助信息与少量哑金形成清晰克制的层级。人文衬线字与简洁无衬线字相互平衡，配合细边框、小圆角和轻浅阴影，营造安静典雅的电影编辑气质。"
+    "thesis": "深墨黑中性色承托暖白正文、低亮灰辅助信息与少量哑金，形成清晰克制的层级。人文衬线字与简洁无衬线字相互平衡，细边框、小圆角和平面表面共同营造安静典雅的电影编辑气质。"
   },
   "screenshot": "screenshot.png",
   "validationNotices": [
     "非媒体可校验像素比例 0.122（阈值 0.2），结果仅供参考。"
   ],
   "fidelity": {
-    "coverage": 0.915,
+    "coverage": 0.943,
     "eligibleRatio": 0.122,
-    "mean": 0.016,
-    "p95": 0.091,
-    "samples": 9850
+    "mean": 0.015,
+    "p95": 0.064,
+    "samples": 9876
   }
 }

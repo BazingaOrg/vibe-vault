@@ -1,21 +1,22 @@
 {
+  "schemaVersion": 2,
   "id": "historyofmarket-com",
   "name": "Historyofmarket",
   "url": "https://historyofmarket.com/",
-  "extractedAt": "2026-08-11",
+  "extractedAt": "2026-08-12",
   "tokens": {
     "colors": [
       {
         "role": "背景 bg",
         "hex": "#ffffff",
         "stability": "L1",
-        "freq": 0.204
+        "freq": 0.21
       },
       {
         "role": "surface",
         "hex": "#f0f4f1",
         "stability": "L1",
-        "freq": 0.204
+        "freq": 0.21
       },
       {
         "role": "text",
@@ -31,9 +32,9 @@
       },
       {
         "role": "accent",
-        "hex": "#52c6c0",
-        "stability": "L2",
-        "freq": 0.009
+        "hex": "#1f3656",
+        "stability": "L1",
+        "freq": 0.06
       },
       {
         "role": "border",
@@ -99,8 +100,8 @@
       "lg": 2
     },
     "shadow": {
-      "weight": "有",
-      "md": "rgb(255, 255, 255) -8px 0px 12px -4px, rgb(198, 206, 205) 0px 1px 0px 0px"
+      "weight": "无",
+      "md": "none"
     }
   },
   "visualGrammar": {
@@ -186,9 +187,9 @@
       "confidence": "high"
     },
     "elevation": {
-      "value": "柔和扩散阴影",
-      "source": "measured",
-      "confidence": "high"
+      "value": "平面，无外部投影",
+      "source": "inferred",
+      "confidence": "medium"
     },
     "shape": {
       "value": "克制小圆角",
@@ -203,7 +204,6 @@
     "elementTraits": [
       "字体角色对照",
       "细线与强调描边并用",
-      "柔和扩散层次",
       "浅色基底",
       "分层表面",
       "克制小圆角"
@@ -213,20 +213,17 @@
     "--tk-font-sans": "\"Literata HOM\", \"PingFang SC\", \"Microsoft YaHei\", \"Hiragino Sans GB\", \"Noto Sans SC\", \"Heiti SC\", system-ui, sans-serif",
     "--tk-font-display": "\"HOM Nameplate Lg\", Georgia, serif",
     "--tk-radius": "2px",
-    "--tk-btn-radius": "2px",
-    "--tk-shadow": "rgb(255, 255, 255) -8px 0px 12px -4px, rgb(198, 206, 205) 0px 1px 0px 0px",
-    "--tk-btn-shadow": "rgb(255, 255, 255) -8px 0px 12px -4px, rgb(198, 206, 205) 0px 1px 0px 0px",
+    "--tk-shadow": "none",
     "--tk-space": "4px",
-    "--tk-btn-border": "transparent",
     "--tk-bg": "#ffffff",
     "--tk-surface": "#f0f4f1",
     "--tk-text": "#181822",
     "--tk-muted": "#5c5c65",
-    "--tk-accent": "#52c6c0",
+    "--tk-accent": "#1f3656",
     "--tk-border": "#c6cecd"
   },
   "warnings": [],
-  "rawPath": "raw.json",
+  "evidenceNotes": [],
   "style": {
     "primary": "Editorial",
     "secondary": "Minimalism",
@@ -237,15 +234,15 @@
       "档案气质",
       "纸墨分明"
     ],
-    "thesis": "以冷白纸面、近黑墨色与细发丝线建立严谨的金融刊物气质，高对比衬线字让内容具有历史档案般的分量。形态保持锐利克制，层次主要依靠明度、字重与疏密变化，强调色也回归稳定墨色。"
+    "thesis": "冷白纸面、近黑墨色与深海军蓝点缀共同形成严谨的金融刊物气质，高对比衬线字体带来历史档案般的分量。细线、近直角形态与紧凑节奏保持克制，层次主要依靠明度、字重和留白建立。"
   },
   "screenshot": "screenshot.png",
   "validationNotices": [],
   "fidelity": {
-    "coverage": 0.957,
+    "coverage": 0.965,
     "eligibleRatio": 0.905,
-    "mean": 0.017,
-    "p95": 0.053,
-    "samples": 73281
+    "mean": 0.016,
+    "p95": 0.041,
+    "samples": 73282
   }
 }

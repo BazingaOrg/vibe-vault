@@ -1,45 +1,46 @@
 {
+  "schemaVersion": 2,
   "id": "codex-resets-com",
   "name": "Codex Resets",
   "url": "https://codex-resets.com/",
-  "extractedAt": "2026-08-11",
+  "extractedAt": "2026-08-12",
   "tokens": {
     "colors": [
       {
         "role": "背景 bg",
         "hex": "#fff4dd",
         "stability": "L1",
-        "freq": 0.227
+        "freq": 0.135
       },
       {
         "role": "surface",
         "hex": "#fffdf7",
         "stability": "L1",
-        "freq": 0.227
+        "freq": 0.135
       },
       {
         "role": "text",
         "hex": "#26201a",
         "stability": "L1",
-        "freq": 0.284
+        "freq": 0.693
       },
       {
         "role": "muted",
         "hex": "#5c5347",
-        "stability": "L2",
-        "freq": 0.01
+        "stability": "L1",
+        "freq": 0.078
       },
       {
         "role": "accent",
         "hex": "#ff5c2b",
-        "stability": "L1",
-        "freq": 0.048
+        "stability": "L2",
+        "freq": 0.012
       },
       {
         "role": "border",
         "hex": "#26201a",
         "stability": "L1",
-        "freq": 0.284
+        "freq": 0.693
       }
     ],
     "typography": {
@@ -47,22 +48,22 @@
       "contrast": "高对比",
       "scale": [
         {
-          "role": "Lead",
-          "px": 17,
-          "w": 400,
-          "lh": 1.55
+          "role": "H5",
+          "px": 28,
+          "w": 800,
+          "lh": 1.12
         },
         {
           "role": "H4",
-          "px": 24,
-          "w": 800,
-          "lh": 1.55
-        },
-        {
-          "role": "H3",
           "px": 30,
           "w": 700,
           "lh": 1.1
+        },
+        {
+          "role": "H3",
+          "px": 33,
+          "w": 800,
+          "lh": 0.94
         },
         {
           "role": "H2",
@@ -74,28 +75,28 @@
           "role": "H1",
           "px": 68,
           "w": 800,
-          "lh": 1.05
+          "lh": 0.95
         }
       ]
     },
     "space": {
       "unit": 4,
-      "density": "适中",
+      "density": "紧凑",
       "scale": [
+        2,
+        3,
         4,
         6,
+        7,
         8,
         9,
-        14,
-        16,
-        17,
-        18
+        10
       ]
     },
     "radius": {
       "tendency": "偏圆润",
       "sm": 3,
-      "md": 10,
+      "md": 12,
       "lg": 14
     },
     "shadow": {
@@ -121,9 +122,9 @@
       "body": {
         "value": {
           "family": "\"Baloo 2\", \"Arial Rounded MT Bold\", system-ui, sans-serif",
-          "size": 15,
+          "size": 18,
           "weight": 700,
-          "lineHeight": 1.1,
+          "lineHeight": 1.35,
           "letterSpacing": 0,
           "fontStyle": "normal",
           "textTransform": "none"
@@ -157,13 +158,13 @@
         "confidence": "high"
       },
       "allocation": {
-        "value": "背景与承载面分层，中性色占主导",
-        "source": "inferred",
+        "value": "奶油中性色为底，暖黄、橙红、粉与浅蓝分区点缀",
+        "source": "judged",
         "confidence": "high"
       },
       "accentRule": {
-        "value": "强调色少量点缀",
-        "source": "inferred",
+        "value": "暖黄承担主要强调，其他明快色小面积并置",
+        "source": "judged",
         "confidence": "medium"
       }
     },
@@ -173,16 +174,16 @@
           1,
           2
         ],
-        "primary": 1,
+        "primary": 2,
         "style": "solid",
-        "character": "细线与强调描边并用"
+        "character": "强调描边"
       },
       "source": "measured",
       "confidence": "high"
     },
     "surface": {
-      "value": "背景与承载面分层，中性色占主导",
-      "source": "inferred",
+      "value": "奶油纸面与暖白承载面依靠墨色边界分层",
+      "source": "judged",
       "confidence": "high"
     },
     "elevation": {
@@ -196,13 +197,13 @@
       "confidence": "high"
     },
     "spacing": {
-      "value": "适中节奏",
+      "value": "紧凑节奏",
       "source": "inferred",
       "confidence": "medium"
     },
     "elementTraits": [
       "统一字体层级",
-      "细线与强调描边并用",
+      "强调描边",
       "偏移硬阴影",
       "浅色基底",
       "分层表面",
@@ -212,12 +213,9 @@
   "theme": {
     "--tk-font-sans": "\"Baloo 2\", \"Arial Rounded MT Bold\", system-ui, sans-serif",
     "--tk-font-display": "\"Baloo 2\", \"Arial Rounded MT Bold\", system-ui, sans-serif",
-    "--tk-radius": "10px",
-    "--tk-btn-radius": "3px",
+    "--tk-radius": "12px",
     "--tk-shadow": "rgb(38, 32, 26) 3px 3px 0px 0px",
-    "--tk-btn-shadow": "rgb(38, 32, 26) 3px 3px 0px 0px",
     "--tk-space": "4px",
-    "--tk-btn-border": "transparent",
     "--tk-bg": "#fff4dd",
     "--tk-surface": "#fffdf7",
     "--tk-text": "#26201a",
@@ -226,7 +224,7 @@
     "--tk-border": "#26201a"
   },
   "warnings": [],
-  "rawPath": "raw.json",
+  "evidenceNotes": [],
   "style": {
     "primary": "Neo-Brutalism",
     "secondary": "Playful-Illustrative",
@@ -236,15 +234,15 @@
       "温暖",
       "直接"
     ],
-    "thesis": "温暖奶油纸色承托厚重墨色与高饱和橙红，形成轻松鲜明的新粗野主义气质。硬边描线、清晰偏移阴影、适度圆角与圆润粗体共同强化直接而有触感的视觉表达。"
+    "thesis": "温暖奶油纸色与深墨色建立厚实清晰的基础，暖黄、橙红、粉和浅蓝以小面积并置，形成轻松鲜明的新粗野主义气质。硬边描线、偏移阴影、柔和圆角与圆润粗体共同带来直接而有触感的视觉表达。"
   },
   "screenshot": "screenshot.png",
   "validationNotices": [],
   "fidelity": {
-    "coverage": 0.917,
-    "eligibleRatio": 0.996,
-    "mean": 0.015,
-    "p95": 0.125,
-    "samples": 80703
+    "coverage": 0.909,
+    "eligibleRatio": 0.995,
+    "mean": 0.018,
+    "p95": 0.13,
+    "samples": 80622
   }
 }

@@ -3,7 +3,7 @@
 ## 风格方向
 主风格：Editorial · 次风格：Luxury-Elegant
 气质词：电影感 / 克制典雅 / 高对比 / 哑金点缀
-以深墨黑中性色为基底，用暖白正文、低亮灰辅助信息与少量哑金形成清晰克制的层级。人文衬线字与简洁无衬线字相互平衡，配合细边框、小圆角和轻浅阴影，营造安静典雅的电影编辑气质。
+深墨黑中性色承托暖白正文、低亮灰辅助信息与少量哑金，形成清晰克制的层级。人文衬线字与简洁无衬线字相互平衡，细边框、小圆角和平面表面共同营造安静典雅的电影编辑气质。
 
 ## 语义色彩
 | 用途 | 色值 | 使用方式 |
@@ -31,7 +31,7 @@
 - 色彩模式：深色基底；背景与承载面分层，中性色占主导；强调色少量点缀。
 - 描边：细线与强调描边并用，1px / 2px solid。
 - 表面：背景与承载面分层，中性色占主导。
-- 层次：轻柔层次阴影。
+- 层次：平面，无外部投影。
 - 形态：克制小圆角。
 - 间距节奏：适中节奏。
 - 元素特征：字体角色对照 / 细线与强调描边并用 / 深色基底 / 分层表面 / 克制小圆角。
@@ -40,7 +40,7 @@
 - 间距基准：4px；整体密度：适中。
 - 间距阶梯：2px / 4px / 6px / 10px / 12px / 14px / 16px / 20px。
 - 圆角：较克制（2px / 4px / 6px）。
-- 阴影：有，rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px。
+- 阴影：无。
 
 ## CSS
 ```css
@@ -48,7 +48,7 @@
   --tk-font-sans: "Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei";
   --tk-font-display: "Cormorant Garamond", "Cormorant Garamond Fallback", "Cormorant Garamond", "Noto Serif SC", "Noto Serif SC Fallback", "Noto Serif SC", "Songti SC", Georgia, serif;
   --tk-radius: 4px;
-  --tk-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px;
+  --tk-shadow: none;
   --tk-space: 4px;
   --tk-bg: #14181e;
   --tk-surface: #2f343d;
