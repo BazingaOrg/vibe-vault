@@ -185,16 +185,15 @@ export function normalizeShadow(value: string | undefined): string {
   return layers.length ? layers.join(", ") : "none";
 }
 function representativeShadow(samples: RawSample[]): string {
-  const candidates = new Map<string, { count: number; area: number; first: number; control: boolean }>();
+  const candidates = new Map<string, { count: number; area: number; first: number }>();
   samples.forEach((sample, index) => {
     const shadow = normalizeShadow(sample.shadow); if (shadow === "none") return;
     const area = Math.max(1, sample.rect.width * sample.rect.height);
-    const current = candidates.get(shadow) ?? { count: 0, area: 0, first: index, control: false };
+    const current = candidates.get(shadow) ?? { count: 0, area: 0, first: index };
     current.count++; current.area += area;
-    current.control ||= (sample.tag === "button" || sample.tag === "a") && area >= 1024;
     candidates.set(shadow, current);
   });
-  return [...candidates.entries()].sort((a, b) => Number(b[1].control) - Number(a[1].control) || b[1].count - a[1].count || b[1].area - a[1].area || a[1].first - b[1].first)[0]?.[0] ?? "none";
+  return [...candidates.entries()].filter(([, value]) => value.count >= 2).sort((a, b) => b[1].count - a[1].count || b[1].area - a[1].area || a[1].first - b[1].first)[0]?.[0] ?? "none";
 }
 function usableFont(sample: RawSample): boolean { return Boolean(sample.fontFamily?.trim()) && Number.isFinite(sample.fontSize) && sample.fontSize > 0; }
 function primaryFont(raw: RawExtraction, samples: RawSample[]): string {
@@ -322,11 +321,11 @@ export function normalize(raw: RawExtraction): Draft {
   const textColor = colors.find(c=>c.role==="text")?.hex, muted = colors.find(c=>c.role==="muted")?.hex, bg = colors.find(c=>c.role==="背景 bg")?.hex, surface=colors.find(c=>c.role==="surface")?.hex, accent=colors.find(c=>c.role==="accent")?.hex, border=colors.find(c=>c.role==="border")?.hex;
   const roles = textRoles(samples, font);
   const displayFont = roles.display.value?.family ?? font;
-  const theme: Record<string,string> = { "--tk-font-sans": font, "--tk-font-display": displayFont, "--tk-radius": `${radius.md}px`, "--tk-btn-radius": `${radius.sm}px`, "--tk-shadow": shadow, "--tk-btn-shadow": shadow, "--tk-space": `${unit}px`, "--tk-btn-border": "transparent" };
+  const theme: Record<string,string> = { "--tk-font-sans": font, "--tk-font-display": displayFont, "--tk-radius": `${radius.md}px`, "--tk-shadow": shadow, "--tk-space": `${unit}px` };
   for (const [k,v] of Object.entries({"--tk-bg":bg,"--tk-surface":surface,"--tk-text":textColor,"--tk-muted":muted,"--tk-accent":accent,"--tk-border":border})) if (v) theme[k]=v;
   const spacingMedian = median(spacings);
   const density = spacingMedian >= 20 ? "偏疏" : spacingMedian >= 12 ? "适中" : "紧凑";
   const tokens: Tokens = { colors, typography: { fontSans: font, contrast: textColor && bg ? contrastLabel(textColor, bg) : "未确定", scale }, space: { unit, density, scale: spacings }, radius, shadow: { weight: shadow === "none" ? "无" : "有", md: shadow } };
   const warnings = [...raw.warnings]; if (colors.length < 3) warnings.push("可用稳定色不足，结果仅供参考。");
-  return { id: raw.id, name: displayName(raw.url), url: raw.url, extractedAt: raw.collectedAt.slice(0,10), tokens, visualGrammar: visualGrammar(samples, colors, radius, shadow, density, font), theme, warnings, rawPath: "raw.json" };
+  return { schemaVersion: 2, id: raw.id, name: displayName(raw.url), url: raw.url, extractedAt: raw.collectedAt.slice(0,10), tokens, visualGrammar: visualGrammar(samples, colors, radius, shadow, density, font), theme, warnings, evidenceNotes: raw.evidenceNotes ?? [] };
 }

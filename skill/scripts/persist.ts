@@ -5,9 +5,12 @@ import { fidelity } from "./verify.js";
 const legal = new Set<string>(STYLE_VOCABULARY);
 export function validateJudgment(value: unknown): Judgment {
   if (!value || typeof value !== "object") throw new Error("judgment.json 必须是对象。"); const j=value as Record<string,unknown>;
+  const keys=Object.keys(j).sort(); if(keys.join(",")!=="descriptors,primary,secondary,thesis") throw new Error("judgment.json 只能包含 primary、secondary、descriptors、thesis。");
   if (typeof j.primary!=="string" || !legal.has(j.primary)) throw new Error("primary 必须来自封闭风格词表。");
   if (j.secondary !== null && (typeof j.secondary!=="string" || !legal.has(j.secondary))) throw new Error("secondary 必须为词表项或 null。");
+  if (j.secondary===j.primary) throw new Error("primary 与 secondary 不能相同。");
   if (!Array.isArray(j.descriptors) || j.descriptors.length<3 || j.descriptors.length>5 || !j.descriptors.every(x=>typeof x==="string"&&x.trim().length>=2&&x.trim().length<=32)) throw new Error("descriptors 必须为 3–5 个长度 2–32 的词。");
+  if (new Set(j.descriptors.map(x=>(x as string).trim().toLocaleLowerCase())).size!==j.descriptors.length) throw new Error("descriptors 不能重复。");
   if (typeof j.thesis!=="string" || j.thesis.trim().length<24 || j.thesis.trim().length>600) throw new Error("thesis 长度必须为 24–600 字符。");
   const sentences=j.thesis.split(/[。！？.!?]+/).filter(Boolean).length; if(sentences<2||sentences>4) throw new Error("thesis 必须为 2–4 句。");
   return {primary:j.primary as Judgment["primary"],secondary:j.secondary as Judgment["secondary"],descriptors:j.descriptors.map(x=>(x as string).trim()),thesis:j.thesis.trim()};
@@ -70,8 +73,7 @@ export function guide(site: SiteRecord): string {
     : `- ${label}：未可靠采集`;
   const value = (signal: { value: unknown } | undefined) => typeof signal?.value === "string" ? signal.value : "未可靠采集";
   const stroke = grammar.stroke.value ? `${grammar.stroke.value.character}，${grammar.stroke.value.widths.map((width) => `${width}px`).join(" / ")} ${grammar.stroke.value.style}` : "未可靠采集";
-  // Control-level button geometry stays out of the reusable CSS (see SKILL.md).
-  const css = Object.entries(site.theme).filter(([name]) => !name.startsWith("--tk-btn-")).map(([name, value]) => `  ${name}: ${value};`).join("\n");
+  const css = Object.entries(site.theme).map(([name, value]) => `  ${name}: ${value};`).join("\n");
   return `# STYLE-GUIDE\n\n## 风格方向\n主风格：${site.style.primary}${site.style.secondary ? ` · 次风格：${site.style.secondary}` : ""}\n气质词：${site.style.descriptors.join(" / ")}\n${site.style.thesis}\n\n## 语义色彩\n| 用途 | 色值 | 使用方式 |\n| --- | --- | --- |\n| 背景 | ${color(site, "background")} | ${usage.background} |\n| 表面 | ${color(site, "surface")} | ${usage.surface} |\n| 正文 | ${color(site, "text")} | ${usage.text} |\n| 次要文字 | ${color(site, "muted")} | ${usage.muted} |\n| 强调 | ${color(site, "accent")} | ${usage.accent} |\n| 边框 | ${color(site, "border")} | ${usage.border} |\n\n## 字体系统\n${roleLine("展示文字", grammar.typography.display)}\n${roleLine("正文", grammar.typography.body)}\n${roleLine("元信息", grammar.typography.meta)}\n- 字体关系：${value(grammar.typography.pairing)}\n- 对比：${t.typography.contrast}。字阶范围 ${min?.px ?? 0}–${max?.px ?? 0}px。\n${scale.length ? scale.map((item) => `- ${item.role}：${item.px}px / ${item.w} / ${item.lh}`).join("\n") : "- 字阶未定义。"}\n\n## 复合视觉语法\n- 色彩模式：${value(grammar.palette.mode)}；${value(grammar.palette.allocation)}；${value(grammar.palette.accentRule)}。\n- 描边：${stroke}。\n- 表面：${value(grammar.surface)}。\n- 层次：${value(grammar.elevation)}。\n- 形态：${value(grammar.shape)}。\n- 间距节奏：${value(grammar.spacing)}。\n- 元素特征：${grammar.elementTraits.length ? grammar.elementTraits.join(" / ") : "未可靠采集"}。\n\n## 间距与形态\n- 间距基准：${t.space.unit}px；整体密度：${t.space.density}。\n- 间距阶梯：${t.space.scale.length ? t.space.scale.map((item) => `${item}px`).join(" / ") : "未定义"}。\n- 圆角：${t.radius.tendency}（${t.radius.sm}px / ${t.radius.md}px / ${t.radius.lg}px）。\n- 阴影：${t.shadow.weight}${t.shadow.weight === "有" ? `，${t.shadow.md}` : ""}。\n\n## CSS\n\`\`\`css\n:root {\n${css}\n}\n\`\`\`\n`;
 }
 async function atomicJson(file:string, value:unknown) { const tmp=`${file}.${process.pid}.tmp`; await writeFile(tmp,JSON.stringify(value,null,2)+"\n"); await rename(tmp,file); }
@@ -79,7 +81,7 @@ export async function finalize(draft: Draft, judgment: unknown, workDir=process.
   const style=validateJudgment(judgment), staging=path.join(workDir,".style-extractor",draft.id), screenshot=path.join(staging,"screenshot.png"); const raw=JSON.parse(await readFile(path.join(staging,"raw.json"),"utf8"));
   const record:SiteRecord={...draft,style,screenshot:"screenshot.png",validationNotices:[]};
   try {
-    record.fidelity=await fidelity(screenshot,raw,record.tokens);
+    record.fidelity=await fidelity(path.join(staging,"evidence","primary-top.png"),raw,record.tokens);
     record.validationNotices=fidelityNotices(record.fidelity);
   } catch { record.validationNotices=["无法完成截图保真校验，结果仅供参考。"] }
   const target=path.join(workDir,"sites",draft.id); await mkdir(target,{recursive:true}); await copyFile(screenshot,path.join(target,"screenshot.png")); await atomicJson(path.join(target,"site.json"),record); await writeFile(path.join(target,"STYLE-GUIDE.md"),guide(record));

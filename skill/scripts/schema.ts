@@ -16,7 +16,7 @@ export interface RawSample {
 }
 export interface RawExtraction {
   url: string; id: string; collectedAt: string; viewport: { width: number; height: number };
-  samples: RawSample[]; rootVariables: Record<string, string>; mediaRects: RawSample["rect"][]; warnings: string[];
+  samples: RawSample[]; rootVariables: Record<string, string>; mediaRects: RawSample["rect"][]; warnings: string[]; evidenceNotes?: string[];
 }
 export interface ColorToken { role: string; hex: string; stability: Stability; freq: number }
 export interface Tokens {
@@ -48,7 +48,7 @@ export interface VisualGrammar {
   spacing: GrammarSignal<string>;
   elementTraits: string[];
 }
-export interface Draft { id: string; name: string; url: string; extractedAt: string; tokens: Tokens; visualGrammar: VisualGrammar; theme: Record<string, string>; warnings: string[]; rawPath: string }
+export interface Draft { schemaVersion: 2; id: string; name: string; url: string; extractedAt: string; tokens: Tokens; visualGrammar: VisualGrammar; theme: Record<string, string>; warnings: string[]; evidenceNotes?: string[] }
 export interface Judgment { primary: StyleName; secondary: StyleName | null; descriptors: string[]; thesis: string }
 export type ValidationFlag = "media-heavy" | "palette-low" | "unavailable";
 export interface FidelityResult { coverage: number; eligibleRatio: number; mean: number; p95: number; samples: number }

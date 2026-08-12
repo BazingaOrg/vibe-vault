@@ -61,6 +61,25 @@ async function settle(page: Page) {
   await page.waitForTimeout(350);
 }
 
+async function preparePage(page: Page) {
+  await page.evaluate(async () => {
+    if (document.fonts?.ready) await document.fonts.ready;
+  }).catch(() => {});
+  const consent = page.getByRole("button", { name: /^(accept all|accept cookies|allow all|agree|同意全部|接受全部|允许全部|全部接受)$/i }).first();
+  if (await consent.isVisible().catch(() => false)) await consent.click({ timeout: 1000 }).catch(() => {});
+  await settle(page);
+}
+
+async function contentWarning(page: Page, sampleCount: number): Promise<string | null> {
+  const state = await page.evaluate(() => {
+    const text = document.body?.innerText.replace(/\s+/g, " ").trim() ?? "";
+    return { textLength: text.length, challenge: /verifying you are human|checking your browser|enable javascript and cookies|access denied|captcha|人机验证|安全验证/i.test(text) };
+  });
+  if (state.challenge) return "页面可能被访问验证拦截，提取结果可能不完整。";
+  if (state.textLength < 40 || sampleCount < 3) return "页面可分析的内容较少，提取结果可能不完整。";
+  return null;
+}
+
 function generatedEvidence(name: string): boolean {
   return name === "manifest.json" || name === "primary-top.png" || /^scroll-\d+\.png$/.test(name) || /^secondary-\d+\.png$/.test(name);
 }
@@ -78,6 +97,13 @@ async function publishCollection(stagingDir: string, targetDir: string) {
   // Build a complete next snapshot, retaining judgments/drafts and manual evidence.
   try {
     try { await cp(targetDir, nextDir, { recursive: true, force: true }); } catch (error) { if (!missingPath(error)) throw error; }
+    await rm(path.join(nextDir, "last-collect-error.json"), { force: true });
+    const judgment = path.join(nextDir, "judgment.json");
+    const previousJudgment = path.join(nextDir, "judgment.previous.json");
+    try {
+      await rm(previousJudgment, { force: true });
+      await rename(judgment, previousJudgment);
+    } catch (error) { if (!missingPath(error)) throw error; }
     await mkdir(nextEvidence, { recursive: true });
     for (const entry of await readdir(nextEvidence, { withFileTypes: true })) {
       if (entry.isFile() && generatedEvidence(entry.name)) await rm(path.join(nextEvidence, entry.name), { force: true });
@@ -105,7 +131,7 @@ async function publishCollection(stagingDir: string, targetDir: string) {
   }
 }
 
-export async function collect(url: string, root = process.cwd()): Promise<{ raw: RawExtraction; dir: string }> {
+export async function collect(url: string, root = process.cwd()): Promise<{ raw: RawExtraction; dir: string; status: "ready" | "limited" | "reused" | "failed" }> {
   const id = siteId(url);
   const extractorRoot = path.join(root, ".style-extractor");
   const dir = path.join(extractorRoot, id);
@@ -115,6 +141,7 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
   await mkdir(evidenceDir, { recursive: true });
   let browser: Browser | undefined;
   const warnings: string[] = [];
+  const evidenceNotes: string[] = [];
   const evidence: Array<{ name: string; note: string; url: string; file: string }> = [];
 
   try {
@@ -122,6 +149,7 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
     const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor: 1 });
     await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForTimeout(1200);
+    await preparePage(page);
 
     // Scroll primary offsets to warm lazy content, capture multi-view evidence along the way.
     for (const y of SCROLL_OFFSETS) {
@@ -139,6 +167,8 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
     // A string is intentionally used here: tsx/esbuild may inject helpers into a
     // serialized TypeScript callback, but the browser context cannot resolve them.
     const payload = await page.evaluate(SAMPLE_SCRIPT) as Pick<RawExtraction, "samples" | "rootVariables" | "mediaRects">;
+    const warning = await contentWarning(page, payload.samples.length);
+    if (warning) warnings.push(warning);
     const primaryOrigin = new URL(page.url()).origin;
 
     // Optional same-host secondary pages: visual evidence only (not merged into tokens).
@@ -150,7 +180,9 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
         secondaryHrefs = await page.evaluate((pageUrl: string) => {
           const base = new URL(pageUrl);
           const seen = new Set<string>();
-          const out: string[] = [];
+          const out: Array<{ href: string; score: number }> = [];
+          const avoid = /(?:^|\/)(?:login|sign-in|signin|sign-up|signup|auth|account|privacy|terms|legal|cookies?|contact|support|careers?|jobs?|press|cart|checkout)(?:\/|$)/i;
+          const prefer = /(?:^|\/)(?:about|product|features?|pricing|work|cases?|stories?|blog|docs?)(?:\/|$)/i;
           for (const a of document.querySelectorAll("a[href]")) {
             try {
               const href = new URL((a as HTMLAnchorElement).href, base).href;
@@ -160,17 +192,19 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
               if (u.pathname === base.pathname && u.search === base.search) continue;
               if (u.hash && u.pathname === base.pathname) continue;
               const key = u.origin + u.pathname + u.search;
-              if (seen.has(key)) continue;
+              if (seen.has(key) || avoid.test(u.pathname)) continue;
               seen.add(key);
-              out.push(u.href);
-              if (out.length >= 2) break;
+              const rect = a.getBoundingClientRect();
+              const visible = rect.width > 1 && rect.height > 1;
+              const score = (prefer.test(u.pathname) ? 4 : 0) + (visible ? 2 : 0) + (a.textContent?.trim() ? 1 : 0);
+              out.push({ href: u.href, score });
             } catch { /* ignore bad hrefs */ }
           }
-          return out;
+          return out.sort((a, b) => b.score - a.score).slice(0, 2).map((item) => item.href);
         }, page.url());
       }
     } catch (error) {
-      warnings.push(`次页发现失败：${error instanceof Error ? error.message : String(error)}`);
+      evidenceNotes.push(`次页发现失败：${error instanceof Error ? error.message : String(error)}`);
     }
 
     let idx = 1;
@@ -179,13 +213,14 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
         await page.goto(href, { waitUntil: "domcontentloaded", timeout: 20000 });
         if (new URL(page.url()).origin !== primaryOrigin) continue;
         await page.waitForTimeout(900);
+        await preparePage(page);
         await page.evaluate(() => window.scrollTo(0, 0));
         await settle(page);
         const name = `secondary-${String(idx).padStart(2, "0")}`;
         evidence.push(await captureEvidence(page, evidenceDir, name, `Secondary same-host page for judgment only`, page.url()));
         idx++;
       } catch (error) {
-        warnings.push(`次页证据未完成：${href} · ${error instanceof Error ? error.message : String(error)}`);
+        evidenceNotes.push(`次页证据未完成：${href} · ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 
@@ -198,10 +233,11 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
       viewport: { ...VIEWPORT },
       ...payload,
       warnings,
+      evidenceNotes,
     };
     await writeFile(path.join(stagingDir, "raw.json"), JSON.stringify(raw, null, 2));
     await publishCollection(stagingDir, dir);
-    return { raw, dir };
+    return { raw, dir, status: warnings.length ? "limited" : "ready" };
   } catch (error) {
     warnings.push(`采集不完整：${error instanceof Error ? error.message : String(error)}`);
     const raw: RawExtraction = {
@@ -213,16 +249,16 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
       rootVariables: {},
       mediaRects: [],
       warnings,
+      evidenceNotes,
     };
     try {
       const previous = JSON.parse(await readFile(path.join(dir, "raw.json"), "utf8")) as RawExtraction;
-      const preserved = { ...previous, warnings: [...previous.warnings, ...warnings.map((warning) => `重采集失败，保留上次成功证据。${warning}`)] };
-      await writeFile(path.join(dir, "raw.json"), JSON.stringify(preserved, null, 2));
-      return { raw: preserved, dir };
+      await writeFile(path.join(dir, "last-collect-error.json"), JSON.stringify({ attemptedAt: raw.collectedAt, url, warnings }, null, 2) + "\n");
+      return { raw: previous, dir, status: "reused" };
     } catch {
       await mkdir(dir, { recursive: true });
       await writeFile(path.join(dir, "raw.json"), JSON.stringify(raw, null, 2));
-      return { raw, dir };
+      return { raw, dir, status: "failed" };
     }
   } finally {
     await browser?.close();
