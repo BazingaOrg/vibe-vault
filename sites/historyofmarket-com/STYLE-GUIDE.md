@@ -56,5 +56,70 @@
   --tk-muted: #5c5c65;
   --tk-accent: #1f3656;
   --tk-border: #c6cecd;
+  --tk-display-font: "HOM Nameplate Lg", Georgia, serif;
+  --tk-display-size: 72px;
+  --tk-display-weight: 900;
+  --tk-display-leading: 0.92;
+  --tk-display-tracking: -1.58px;
+  --tk-display-style: normal;
+  --tk-display-transform: none;
+  --tk-body-font: "Literata HOM", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Noto Sans SC", "Heiti SC", system-ui, sans-serif;
+  --tk-body-size: 19px;
+  --tk-body-weight: 400;
+  --tk-body-leading: 1.74;
+  --tk-body-tracking: 0.04px;
+  --tk-body-style: normal;
+  --tk-body-transform: none;
+  --tk-meta-font: "HOM Figure", "Apparatus HOM", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --tk-meta-size: 10px;
+  --tk-meta-weight: 400;
+  --tk-meta-leading: 1.55;
+  --tk-meta-tracking: 1px;
+  --tk-meta-style: normal;
+  --tk-meta-transform: none;
+  --tk-stroke-width: 1px;
+  --tk-stroke-style: solid;
+}
+
+.style-display {
+  font-family: var(--tk-display-font);
+  font-size: var(--tk-display-size);
+  font-weight: var(--tk-display-weight);
+  line-height: var(--tk-display-leading);
+  letter-spacing: var(--tk-display-tracking);
+  font-style: var(--tk-display-style);
+  text-transform: var(--tk-display-transform);
+}
+
+.style-body {
+  font-family: var(--tk-body-font);
+  font-size: var(--tk-body-size);
+  font-weight: var(--tk-body-weight);
+  line-height: var(--tk-body-leading);
+  letter-spacing: var(--tk-body-tracking);
+  font-style: var(--tk-body-style);
+  text-transform: var(--tk-body-transform);
+}
+
+.style-meta {
+  font-family: var(--tk-meta-font);
+  font-size: var(--tk-meta-size);
+  font-weight: var(--tk-meta-weight);
+  line-height: var(--tk-meta-leading);
+  letter-spacing: var(--tk-meta-tracking);
+  font-style: var(--tk-meta-style);
+  text-transform: var(--tk-meta-transform);
 }
 ```
+
+## 复用与来源
+- 来源：https://historyofmarket.com/
+- 采集日期：2026-08-12
+- 先加载对应字体，再应用角色样式；仅声明字体名称不会安装或下载字体。本风格包不包含字体文件。
+- 字体栈："HOM Nameplate Lg", Georgia, serif
+- 字体栈："Literata HOM", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Noto Sans SC", "Heiti SC", system-ui, sans-serif
+- 字体栈："HOM Figure", "Apparatus HOM", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif
+- 将 .style-display 用于展示文字、.style-body 用于正文、.style-meta 用于辅助文字，并用语义色变量设置背景与文本。
+- 优先保留展示字与正文的关系、背景与表面的层次、强调色比例、描边和阴影。角色字号为采样值，按目标内容和屏幕调整。
+- 色彩与角色 CSS 用于你的内容；原站布局、图片、图表和数据不在风格包中。
+- 调色板覆盖率仅验证采样画面的颜色，不是整体相似度。

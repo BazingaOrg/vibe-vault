@@ -56,5 +56,70 @@
   --tk-muted: #a8a59e;
   --tk-accent: #c9a96e;
   --tk-border: #2f343d;
+  --tk-display-font: "Cormorant Garamond", "Cormorant Garamond Fallback", "Cormorant Garamond", "Noto Serif SC", "Noto Serif SC Fallback", "Noto Serif SC", "Songti SC", Georgia, serif;
+  --tk-display-size: 48px;
+  --tk-display-weight: 400;
+  --tk-display-leading: 1.12;
+  --tk-display-tracking: 0px;
+  --tk-display-style: normal;
+  --tk-display-transform: none;
+  --tk-body-font: "Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei";
+  --tk-body-size: 14px;
+  --tk-body-weight: 400;
+  --tk-body-leading: 1.63;
+  --tk-body-tracking: 0px;
+  --tk-body-style: normal;
+  --tk-body-transform: none;
+  --tk-meta-font: "Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei";
+  --tk-meta-size: 9px;
+  --tk-meta-weight: 600;
+  --tk-meta-leading: 1;
+  --tk-meta-tracking: 0.23px;
+  --tk-meta-style: normal;
+  --tk-meta-transform: uppercase;
+  --tk-stroke-width: 1px;
+  --tk-stroke-style: solid;
+}
+
+.style-display {
+  font-family: var(--tk-display-font);
+  font-size: var(--tk-display-size);
+  font-weight: var(--tk-display-weight);
+  line-height: var(--tk-display-leading);
+  letter-spacing: var(--tk-display-tracking);
+  font-style: var(--tk-display-style);
+  text-transform: var(--tk-display-transform);
+}
+
+.style-body {
+  font-family: var(--tk-body-font);
+  font-size: var(--tk-body-size);
+  font-weight: var(--tk-body-weight);
+  line-height: var(--tk-body-leading);
+  letter-spacing: var(--tk-body-tracking);
+  font-style: var(--tk-body-style);
+  text-transform: var(--tk-body-transform);
+}
+
+.style-meta {
+  font-family: var(--tk-meta-font);
+  font-size: var(--tk-meta-size);
+  font-weight: var(--tk-meta-weight);
+  line-height: var(--tk-meta-leading);
+  letter-spacing: var(--tk-meta-tracking);
+  font-style: var(--tk-meta-style);
+  text-transform: var(--tk-meta-transform);
 }
 ```
+
+## 复用与来源
+- 来源：https://yeguozi.com/
+- 采集日期：2026-08-12
+- 先加载对应字体，再应用角色样式；仅声明字体名称不会安装或下载字体。本风格包不包含字体文件。
+- 字体栈："Cormorant Garamond", "Cormorant Garamond Fallback", "Cormorant Garamond", "Noto Serif SC", "Noto Serif SC Fallback", "Noto Serif SC", "Songti SC", Georgia, serif
+- 字体栈："Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei"
+- 将 .style-display 用于展示文字、.style-body 用于正文、.style-meta 用于辅助文字，并用语义色变量设置背景与文本。
+- 优先保留展示字与正文的关系、背景与表面的层次、强调色比例、描边和阴影。角色字号为采样值，按目标内容和屏幕调整。
+- 色彩与角色 CSS 用于你的内容；原站布局、图片、图表和数据不在风格包中。
+- 校验说明：非媒体可校验像素比例 0.122（阈值 0.2），结果仅供参考。
+- 调色板覆盖率仅验证采样画面的颜色，不是整体相似度。
