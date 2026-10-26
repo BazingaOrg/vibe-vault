@@ -1,20 +1,129 @@
-// @ts-check
-/** @typedef {import('../skill/scripts/schema.js').IndexEntry} IndexEntry */
-import { fontFamilyName, foregroundFor, previewBackdropFor, role, validColor } from './theme.js?v=20260812-plain-language';
+import { contrastRatio, foregroundFor } from './theme.js?v=20261026-style-fidelity';
 export const esc = value => String(value ?? '').replace(/[&<>'"]/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[character]));
-const $ = selector => /** @type {HTMLElement} */ (document.querySelector(selector));
+const $ = selector => document.querySelector(selector);
+
 const STYLE_LABELS = {'Minimalism':'极简','Swiss-International':'瑞士国际主义','Neo-Brutalism':'新粗野主义','Brutalism':'粗野主义','Glassmorphism':'玻璃质感','Neumorphism':'柔和拟物','Claymorphism':'黏土质感','Flat':'扁平化','Material':'材料设计','Skeuomorphism':'拟物风格','Editorial':'编辑排版','Corporate':'商务专业','Dark-Tech':'暗色科技','Retro-Y2K':'复古 Y2K','Memphis':'孟菲斯','Maximalism':'繁复主义','Luxury-Elegant':'精致优雅','Geometric-Bauhaus':'几何包豪斯','Playful-Illustrative':'活泼插画','Organic-Natural':'自然有机'};
 export const styleLabel = value => STYLE_LABELS[value]||value;
-function cardStatus(entry) { return entry.partial?['信息不全','partial']:null; }
-export function renderGallery(entries, selectedId) { $('#gallery').setAttribute('aria-busy','false'); $('#gallery').innerHTML=entries.length ? entries.map(entry => { const status=cardStatus(entry), accent=validColor(entry.accent)?` style="--card-accent:${esc(entry.accent)}"`:''; const styles=[entry.primaryStyle,entry.secondaryStyle].filter(Boolean).map(styleLabel); return `<button class="site-card" data-id="${esc(entry.id)}" aria-pressed="${entry.id===selectedId}"${accent} aria-label="${esc(`${entry.name}，${styles.join('，')}${status?`，${status[0]}`:''}，查看风格详情`)}"><span class="site-media"><img src="sites/${encodeURIComponent(entry.id)}/screenshot.png" loading="lazy" decoding="async" alt=""></span><span class="card-caption"><span class="card-title"><strong>${esc(entry.name)}</strong>${status?`<em class="card-status card-status--${status[1]}">${status[0]}</em>`:''}</span><span>${esc(styles.join(' · '))}</span><small>${esc(entry.descriptors.join(' · '))}</small></span></button>`; }).join('') : '<div class="empty empty--row"><span>没有匹配的收藏。</span><button class="chip" type="button" data-clear>清除筛选与搜索</button></div>';
+
+export function renderGallerySelection(id) {
+  for (const card of document.querySelectorAll(".site-card")) {
+    const selected = card.dataset.id === id;
+    card.setAttribute("aria-pressed", String(selected));
+    card.querySelector(".card-arrow").textContent = selected ? "●" : "↗";
+  }
 }
-export function renderGallerySkeleton() { $('#gallery').innerHTML=Array.from({length:4},()=>'<div class="skeleton" aria-hidden="true"></div>').join(''); }
-export function renderDetailSkeleton() { $('#detail').hidden=false; $('#current-shot').removeAttribute('src'); $('#current-style').textContent=''; $('#current-name').textContent='正在加载…'; $('#tags').innerHTML=''; $('#thesis').innerHTML='<span class="detail-skeleton"></span><span class="detail-skeleton"></span><span class="detail-skeleton"></span>'; $('#facts').textContent='正在加载…'; $('#swatches').innerHTML=''; $('#type-scale').innerHTML=''; $('#spaces').innerHTML=''; $('#radii').innerHTML=''; $('#grammar').innerHTML=''; $('#code-content').innerHTML='<span class="detail-skeleton"></span><span class="detail-skeleton"></span><span class="detail-skeleton"></span>'; }
-export function colorPreview(name,key,color,textColor,backgroundColor,surfaceColor) { const background=validColor(backgroundColor)?backgroundColor:'#fff'; const surface=validColor(surfaceColor)?surfaceColor:background; const stage=key==='background'?color:background; const meta=foregroundFor(key==='background'?color:stage,textColor); const copy=`data-copy="${esc(color)}" aria-label="复制${name}色值 ${esc(color)}"`; if(key==='background') return `<button type="button" class="swatch swatch--background" ${copy}><span class="swatch-sample sample-background" style="background:${esc(color)};color:${esc(meta)}"><span class="sample-label">${esc(name)}</span><span class="sample-surface" style="background:${esc(surface)};color:${esc(foregroundFor(surface,textColor))}"><span class="sample-lines"><i></i><i></i></span><small>${esc(color)}</small></span></span></button>`; if(key==='surface') return `<button type="button" class="swatch swatch--surface" ${copy}><span class="swatch-sample sample-surface-stage" style="background:${esc(background)};color:${esc(foregroundFor(background,textColor))}"><span class="sample-label">${esc(name)}</span><span class="sample-card" style="background:${esc(color)};color:${esc(foregroundFor(color,textColor))}"><span class="sample-lines"><i></i><i></i></span><small>${esc(color)}</small></span></span></button>`; if(key==='text'||key==='muted') return `<button type="button" class="swatch swatch--${key}" ${copy}><span class="swatch-sample sample-copy" style="background:${esc(background)};color:${esc(foregroundFor(background,textColor))}"><span class="sample-label">${esc(name)}</span><strong style="color:${esc(color)}">示例文字</strong><small>${esc(color)}</small></span></button>`; if(key==='accent') return `<button type="button" class="swatch swatch--accent" ${copy}><span class="swatch-sample sample-action-stage" style="background:${esc(background)};color:${esc(foregroundFor(background,textColor))}"><span class="sample-label">${esc(name)}</span><span class="sample-action" style="background:${esc(color)};color:${esc(foregroundFor(color,textColor))}">保存这份风格</span><small>${esc(color)}</small></span></button>`; const backdrop=previewBackdropFor(color,backgroundColor,surfaceColor); return `<button type="button" class="swatch swatch--border" ${copy}><span class="swatch-sample sample-border-stage" style="background:${esc(backdrop)};color:${esc(foregroundFor(backdrop,textColor))}"><span class="sample-label">${esc(name)}</span><span class="sample-border" style="border-color:${esc(color)}"><span>2px 描边</span></span><small>${esc(color)}</small></span></button>`; }
-function applyDetailTheme(theme) { const nodes=[$('#detail'),$('#specimen')]; for(const node of nodes) { node.removeAttribute('style'); for(const [name,value] of Object.entries(theme||{})) if(/^--tk-(?:font-sans|font-display|radius|shadow|space|bg|surface|text|muted|accent|border)$/.test(name)&&typeof value==='string') node.style.setProperty(name,value); } const accent=theme?.['--tk-accent']; if(validColor(accent)) $('#specimen').style.setProperty('--specimen-accent-ink',foregroundFor(accent)); }
-function grammarValue(signal) { if(!signal||signal.value==null) return '暂未识别'; if(typeof signal.value==='string') return signal.value; if(typeof signal.value==='object'&&'character' in signal.value) return `${signal.value.character} · ${(signal.value.widths||[signal.value.primary]).map(value=>`${value}px`).join(' / ')} ${signal.value.style==='solid'?'实线':signal.value.style}`; return String(signal.value); }
-function grammarCard(label,signal) { return `<article class="grammar-card"><div><span>${esc(label)}</span></div><strong>${esc(grammarValue(signal))}</strong></article>`; }
-const typeRoleLabel = role => /^H1$/i.test(role)?'主标题':/^H[23]$/i.test(role)?'大标题':/^H\d$/i.test(role)?'小标题':/^lead$/i.test(role)?'较大正文':/^small$/i.test(role)?'小字':/^body$/i.test(role)?'正文':role||'文字';
-const weightLabel = weight => weight>=700?'粗体':weight>=500?'中等':weight<=300?'细体':'常规';
-export function renderDetail(site, guideState, guide) { const tokens=site.tokens||{}, typography=tokens.typography||{}, radius=tokens.radius||{}, space=tokens.space||{}, shadow=tokens.shadow||{}, colors=tokens.colors||[], grammar=site.visualGrammar||{}; const text=role(colors,'text')?.hex, background=role(colors,'background')?.hex, surface=role(colors,'surface')?.hex; $('#detail').hidden=false; $('#current-shot').src=`sites/${encodeURIComponent(site.id)}/screenshot.png`; $('#current-shot').alt=`${site.name||'所选网站'}风格截图`; $('#current-name').textContent=site.name||'未命名收藏'; $('#specimen-title').textContent=site.name||'风格标题'; $('#current-style').textContent=[site.style?.primary,site.style?.secondary].filter(Boolean).map(styleLabel).join(' · ')||'暂未分类'; $('#thesis').textContent=site.style?.thesis||'暂无风格说明。'; $('#tags').innerHTML=(site.style?.descriptors||[]).map(value=>`<span class="tag">${esc(value)}</span>`).join(''); const warnings=Array.isArray(site.warnings)?site.warnings:[]; const caution=warnings.length?'部分内容未识别，建议结合截图判断。':''; $('#facts').innerHTML=`<span>收藏于 ${esc(site.extractedAt||'未知日期')}</span><a href="${esc(safeUrl(site.url))}" target="_blank" rel="noreferrer">访问原站 ↗</a>${caution?`<small class="fact-warning">${esc(caution)}</small>`:''}`; applyDetailTheme(site.theme||{}); $('#swatches').innerHTML=[['背景','background'],['内容底色','surface'],['正文','text'],['辅助文字','muted'],['点缀色','accent'],['边框','border']].map(([name,key])=>{const value=role(colors,key)?.hex; return validColor(value)?colorPreview(name,key,value,text,background,surface):`<div class="swatch-missing"><b>${name}</b><small>暂未识别</small></div>`;}).join(''); const bodyFont=grammar.typography?.body?.value?.family||typography.fontSans||'', displayFont=grammar.typography?.display?.value?.family||bodyFont; const displayName=fontFamilyName(displayFont), bodyName=fontFamilyName(bodyFont); $('#font-stack').textContent=displayName===bodyName?`字体 · ${bodyName}`:`标题 · ${displayName} / 正文 · ${bodyName}`; $('#font-stack').title=displayName===bodyName?`字体：${bodyName}`:`标题字体：${displayName}\n正文字体：${bodyName}`; $('#type-scale').innerHTML=(typography.scale||[]).map(item=>{const display=/^H\d|display/i.test(String(item.role||'')); return `<div class="type-row ${display?'type-row--display':'type-row--body'}" style="font-size:${Number(item.px)||16}px;font-weight:${Number(item.w)||400};line-height:${Number(item.lh)||1.4}">${esc(typeRoleLabel(String(item.role||'')))}<small>${Number(item.px)||16}px · ${weightLabel(Number(item.w)||400)}</small></div>`;}).join('')||'<span class="empty">暂未识别字号。</span>'; $('#density').textContent=space.density||'暂未识别'; const scale=[...new Set((space.scale||[]).map(Number).filter(Number.isFinite))].sort((a,b)=>a-b); $('#spaces').innerHTML=scale.map(value=>`<div class="space-row"><span>${value}px</span><span class="space-demo" style="gap:${value}px"><i class="space-block"></i><i class="space-block"></i></span></div>`).join('')||'<span class="empty">暂未识别间距。</span>'; const radii=[['小',radius.sm],['中',radius.md],['大',radius.lg]].filter(([,value])=>Number.isFinite(Number(value))&&Number(value)>=0); $('#radii').innerHTML=radii.map(([name,value])=>`<span class="radius-sample"><i class="radius-box" style="border-radius:${Number(value)}px"></i><small>${name} · ${Number(value)}px</small></span>`).join('')||'<span class="empty">暂未识别圆角。</span>'; const hasShadow=typeof shadow.md==='string'&&!/^none$/i.test(shadow.md); $('#shape-title').textContent=hasShadow?'圆角与阴影':'圆角'; $('#shadow').hidden=!hasShadow; if(hasShadow) { $('#shadow').innerHTML='<div class="shadow-sample"><span>阴影效果</span></div>'; $('#shadow').querySelector('.shadow-sample').style.boxShadow=shadow.md; } const allocation=grammar.palette?.allocation, surfaceSignal=grammar.surface; const grammarItems=[['字体搭配',grammar.typography?.pairing],['明暗基调',grammar.palette?.mode],['颜色层次',allocation],['点缀色',grammar.palette?.accentRule],['边框',grammar.stroke],['承载面',surfaceSignal],['阴影',grammar.elevation],['圆角',grammar.shape],['间距感',grammar.spacing]].filter(([name,signal])=>signal?.value!=null&&(name!=='承载面'||signal.value!==allocation?.value)); $('#grammar').innerHTML=grammarItems.length?grammarItems.map(([name,signal])=>grammarCard(name,signal)).join(''):'<p class="empty">暂未识别出稳定的风格特征。</p>'; const label=$('#copy-code .copy-label'), button=$('#copy-code'); button.disabled=guideState!=='ready'; label.textContent=guideState==='ready'?'复制开发参数':guideState==='error'?'参数加载失败':'加载中…'; $('#code-content').textContent=guideState==='ready'?guide:guideState==='error'?'开发参数加载失败，请刷新后重试。':'正在加载开发参数…'; }
-function safeUrl(value) { try { const url=new URL(value); return /^https?:$/.test(url.protocol)?url.href:'#'; } catch { return '#'; } }
+
+export function renderGallery(entries, selectedId) {
+  $('#gallery').setAttribute('aria-busy', 'false');
+  $('#gallery').innerHTML = entries.length ? entries.map((entry, index) => `
+    <button type="button" class="site-card" data-id="${esc(entry.id)}" aria-pressed="${entry.id === selectedId}" aria-label="${esc(entry.name)}，查看风格详情">
+      <span class="site-media"><img src="sites/${encodeURIComponent(entry.id)}/screenshot.png" loading="lazy" decoding="async" alt=""></span>
+      <span class="card-caption"><span class="card-index">${String(index + 1).padStart(2, '0')}</span><span class="card-copy"><strong title="${esc(entry.name)}">${esc(entry.name)}</strong><span>${esc(entry.descriptors.slice(0, 3).join(' · '))}</span></span><span class="card-arrow" aria-hidden="true">${entry.id === selectedId ? '●' : '↗'}</span></span>
+    </button>`).join('') : '<div class="empty"><span>还没有匹配的风格。</span><button class="chip" type="button" data-clear>清除筛选与搜索</button></div>';
+}
+
+export function renderGallerySkeleton() {
+  $('#gallery').setAttribute('aria-busy', 'true');
+  $('#gallery').innerHTML = '<div class="empty">正在打开收藏册…</div>';
+}
+
+export function renderDetailSkeleton() {
+  $('#detail').hidden = false;
+  $('#detail').setAttribute('aria-busy', 'true');
+  $('#detail-content').hidden = true;
+  $('#current-name').textContent = '正在翻阅…';
+  $('#current-style').textContent = '';
+  $('#tags').textContent = '';
+  $('#thesis').textContent = '';
+  $('#current-shot').removeAttribute('src');
+  $('#current-shot').alt = '';
+  $('#current-image-link').removeAttribute('href');
+  $('#source-link').removeAttribute('href');
+  $('#record-status').textContent = '';
+  $('#detail-error').textContent = '';
+  renderGuide('loading');
+}
+
+function applyPageTheme(theme, grammar) {
+  const root = document.documentElement;
+  const names = ['font-sans','font-display','radius','shadow','space','bg','surface','text','muted','accent','border'];
+  for (const name of names) {
+    const key = `--tk-${name}`;
+    root.style.removeProperty(key);
+    const value = theme?.[key];
+    if (typeof value === 'string' && value.trim()) root.style.setProperty(key, value);
+  }
+  const style = getComputedStyle(root);
+  const color = name => style.getPropertyValue(`--tk-${name}`).trim();
+  const background = color('bg'), surface = color('surface'), text = color('text');
+  const readable = value => contrastRatio(value, background) >= 4.5 && contrastRatio(value, surface) >= 4.5 ? value : text;
+  root.style.setProperty('--ui-muted', readable(color('muted')));
+  root.style.setProperty('--ui-accent-text', readable(color('accent')));
+  root.style.setProperty('--ui-focus', contrastRatio(color('accent'), background) >= 3 ? color('accent') : text);
+  root.style.setProperty('--specimen-accent-ink', foregroundFor(color('accent')));
+  root.style.setProperty('color-scheme', foregroundFor(background) === '#fff' ? 'dark' : 'light');
+  const type = grammar?.typography;
+  const display = type?.display?.value;
+  const body = type?.body?.value;
+  const meta = type?.meta?.value;
+  const number = (value, fallback, min, max) => Number.isFinite(Number(value)) && value !== null && value !== undefined ? Math.min(max, Math.max(min, Number(value))) : fallback;
+  root.style.setProperty('--ui-heading-weight', String(number(display?.weight, 700, 100, 900)));
+  root.style.setProperty('--ui-heading-tracking', `${number(display?.letterSpacing, 0, -5, 10)}px`);
+  root.style.setProperty('--ui-heading-leading', String(number(display?.lineHeight, 1.1, .9, 1.6)));
+  root.style.setProperty('--ui-body-size', `${number(body?.size, 16, 14, 18)}px`);
+  root.style.setProperty('--ui-body-weight', String(number(body?.weight, 400, 100, 900)));
+  root.style.setProperty('--ui-body-leading', String(number(body?.lineHeight, 1.6, 1.3, 2)));
+  root.style.setProperty('--ui-body-tracking', `${number(body?.letterSpacing, 0, -2, 5)}px`);
+  root.style.setProperty('--ui-meta-font', meta?.family || 'var(--tk-font-sans)');
+  root.style.setProperty('--ui-meta-weight', String(number(meta?.weight, 400, 100, 900)));
+  root.style.setProperty('--ui-meta-tracking', `${number(meta?.letterSpacing, 0, 0, 2)}px`);
+  root.style.setProperty('--ui-stroke', `${number(grammar?.stroke?.value?.primary, 1, 1, 3)}px`);
+  root.style.setProperty('--ui-stroke-style', ['solid', 'dashed', 'dotted', 'double'].includes(grammar?.stroke?.value?.style) ? grammar.stroke.value.style : 'solid');
+
+}
+
+
+function safeUrl(value) {
+  try { const url = new URL(value); return /^https?:$/.test(url.protocol) ? url.href : '#'; }
+  catch { return '#'; }
+}
+
+export function renderDetail(site) {
+  applyPageTheme(site.theme || {}, site.visualGrammar || {});
+  $('#detail').hidden = false;
+  $('#detail').setAttribute('aria-busy', 'false');
+  $('#detail-content').hidden = false;
+  $('#current-name').textContent = site.name || '未命名收藏';
+  $('#current-name').classList.toggle('long-title', String(site.name || '').split(/\s+/).some(word => word.length > 12));
+  try { $('#current-style').textContent = new URL(site.url).hostname; }
+  catch { $('#current-style').textContent = site.name || ''; }
+  $('#tags').innerHTML = (site.style?.descriptors || []).map(value => `<span>${esc(value)}</span>`).join('');
+  $('#thesis').textContent = site.style?.thesis?.match(/^.*?[。！？.!?](?:\s|$|(?=[^\x00-\x7F]))/)?.[0]?.trim() || site.style?.thesis || '';
+  const screenshot = `sites/${encodeURIComponent(site.id)}/screenshot.png`;
+  $('#current-shot').src = screenshot;
+  $('#current-shot').alt = `${site.name}原站参考截图`;
+  $('#current-image-link').href = screenshot;
+  $('#source-link').href = safeUrl(site.url);
+  $('#detail-error').textContent = '';
+  const warnings = Array.isArray(site.warnings) ? site.warnings : [];
+  $('#record-status').textContent = warnings.length ? '这份风格尚不完整' : '';
+}
+
+export function renderDetailError(name, error) {
+  applyPageTheme({}, {});
+  $('#detail').setAttribute('aria-busy', 'false');
+  $('#current-name').textContent = name;
+  $('#current-name').classList.remove('long-title');
+  $('#thesis').textContent = `无法加载这份记录：${error instanceof Error ? error.message : String(error)}`;
+  $('#detail-error').innerHTML = '<button class="chip" type="button" data-retry-detail>重新加载详情</button>';
+  $('[data-retry-detail]').focus({ preventScroll: true });
+}
+
+export function renderGuide(guideState) {
+  const ready = guideState === 'ready';
+  $('#copy-code').disabled = !ready;
+  $('#download-guide').disabled = !ready;
+  $('#retry-guide').hidden = guideState !== 'error';
+  $('#copy-code .copy-label').textContent = ready ? '复制风格' : guideState === 'error' ? '风格包暂不可用' : '准备风格包…';
+  $('#guide-feedback').textContent = guideState === 'error' ? '文档加载失败，可重试。原站参考仍可查看。' : '';
+}
