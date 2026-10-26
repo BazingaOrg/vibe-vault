@@ -231,7 +231,8 @@ function textRoles(samples: RawSample[], bodyFamily?: string) {
   const display = [...text].filter((sample) => sample.fontSize >= 24).sort((a, b) => b.fontSize - a.fontSize || byArea(a, b))[0]
     ?? [...text].sort((a, b) => b.fontSize - a.fontSize || byArea(a, b))[0];
   const bodyCandidates = [...text].filter((sample) => sample.fontSize >= 13 && sample.fontSize <= 20);
-  const body = bodyCandidates.filter((sample) => !bodyFamily || sample.fontFamily === bodyFamily).sort(byArea)[0]
+  const prose = bodyCandidates.filter((sample) => ["p", "li", "blockquote"].includes(sample.tag) && sample.fontWeight <= 500).sort(byArea)[0];
+  const body = prose ?? bodyCandidates.filter((sample) => !bodyFamily || sample.fontFamily === bodyFamily).sort(byArea)[0]
     ?? bodyCandidates.sort(byArea)[0]
     ?? [...text].sort(byArea)[0];
   const meta = [...text].filter((sample) => sample.fontSize <= 14).sort((a, b) => a.fontSize - b.fontSize || byArea(a, b))[0];
@@ -321,7 +322,7 @@ export function normalize(raw: RawExtraction): Draft {
   const textColor = colors.find(c=>c.role==="text")?.hex, muted = colors.find(c=>c.role==="muted")?.hex, bg = colors.find(c=>c.role==="背景 bg")?.hex, surface=colors.find(c=>c.role==="surface")?.hex, accent=colors.find(c=>c.role==="accent")?.hex, border=colors.find(c=>c.role==="border")?.hex;
   const roles = textRoles(samples, font);
   const displayFont = roles.display.value?.family ?? font;
-  const theme: Record<string,string> = { "--tk-font-sans": font, "--tk-font-display": displayFont, "--tk-radius": `${radius.md}px`, "--tk-shadow": shadow, "--tk-space": `${unit}px` };
+  const theme: Record<string,string> = { "--tk-font-sans": roles.body.value?.family ?? font, "--tk-font-display": displayFont, "--tk-radius": `${radius.md}px`, "--tk-shadow": shadow, "--tk-space": `${unit}px` };
   for (const [k,v] of Object.entries({"--tk-bg":bg,"--tk-surface":surface,"--tk-text":textColor,"--tk-muted":muted,"--tk-accent":accent,"--tk-border":border})) if (v) theme[k]=v;
   const spacingMedian = median(spacings);
   const density = spacingMedian >= 20 ? "偏疏" : spacingMedian >= 12 ? "适中" : "紧凑";

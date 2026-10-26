@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><style>
+  body { margin: 0; color: #172033; font: 16px Arial, sans-serif; }
+  #partial { position: fixed; left: -40px; top: 20px; width: 100px; height: 50px; }
+  #background { width: 200px; height: 80px; background-image: url("data:image/gif;base64,R0lGODlhAQABAAAAACw="); }
+  #gradient { width: 180px; height: 50px; background-image: linear-gradient(#111, #eee); }
+  #hidden { display: none; } #invisible { visibility: hidden; } #transparent { opacity: 0; }
+  #offscreen { position: fixed; left: 1500px; top: 20px; width: 100px; height: 50px; }
+</style></head><body>
+  <img id="partial" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="partial">
+  <iframe src="about:blank" title="frame"></iframe><object data="about:blank"></object><embed src="about:blank">
+  <section id="background">Background text remains eligible.</section><div id="gradient">Gradient text remains eligible.</div>
+  <p style="font: 17px/1.6 Arial, sans-serif">A paragraph with <a href="#">an inline link</a> and readable text.</p>
+  <aside id="hidden">hidden</aside><article id="invisible">invisible</article><nav id="transparent">transparent</nav><footer id="offscreen">offscreen</footer>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+<section style="content-visibility:hidden;position:fixed;top:100px;left:100px;width:100px;height:30px;color:rgb(255,0,255)">Hidden ink</section>
+</body></html>

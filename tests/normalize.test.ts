@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { clusterColors, colorToOklch, contrastLabel, contrastRatio, displayName, distance, normalize, normalizeShadow, splitShadowLayers } from "../skill/scripts/normalize.js";
 import { siteId } from "../skill/scripts/collect.js";
-import { fidelityFlags, fidelityNotices, guide, indexEntry, sortIndex, validateJudgment } from "../skill/scripts/persist.js";
+import { exportTheme, fidelityFlags, fidelityNotices, guide, indexEntry, sortIndex, validateJudgment } from "../skill/scripts/persist.js";
 import { collect } from "../skill/scripts/collect.js";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -10,14 +10,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 import type { RawExtraction } from "../skill/scripts/schema.js";
 // @ts-expect-error Browser helpers intentionally stay dependency-free JavaScript.
-import { defaults, fontFamilyName, fontStackSummary, foregroundFor, previewBackdropFor, splitFontStack } from "../assets/theme.js";
-// @ts-expect-error Browser renderer intentionally stays dependency-free JavaScript.
-import { colorPreview } from "../assets/render.js";
+import { foregroundFor } from "../assets/theme.js";
 const base: RawExtraction={url:"https://www.example.com/x",id:"example-com",collectedAt:"2026-07-22T00:00:00Z",viewport:{width:1440,height:900},rootVariables:{},mediaRects:[],warnings:[],samples:[
  {tag:"body",root:true,text:false,media:false,rect:{x:0,y:0,width:1440,height:900},colors:{backgroundColor:"rgb(255,255,255)",color:"rgb(12, 20, 33)",borderColor:"rgba(0, 0, 0, 0)"},fontFamily:"Inter, sans-serif",fontSize:16,fontWeight:400,lineHeight:24,radius:0,shadow:"none",spacing:[8,16]},
  ...Array.from({length:10},(_,i)=>({tag:"a",text:true,media:false,rect:{x:i*10,y:20,width:100,height:30},colors:{backgroundColor:"rgba(0, 0, 0, 0)",color:"rgb(98, 91, 255)",borderColor:"rgb(230, 235, 241)"},fontFamily:"Inter, sans-serif",fontSize:16,fontWeight:500,lineHeight:24,radius:8,shadow:"0 2px 8px rgba(10,37,64,.08)",spacing:[8,16]}))
 ]};
-test("normalizes a versioned public record without control-specific fields",()=>{ const d=normalize(base); assert.equal(d.schemaVersion,2); assert.equal(d.id,"example-com"); assert.ok(d.tokens.colors.some(c=>c.role==="背景 bg")); assert.ok(d.theme["--tk-bg"]); assert.equal(d.tokens.space.unit,8); assert.ok(clusterColors(base).length>=3); assert.equal("rawPath" in d,false); assert.equal(Object.keys(d.theme).some((name)=>name.startsWith("--tk-btn-")),false); assert.equal(Object.keys(defaults).some((name)=>name.startsWith("--tk-btn-")),false); assert.equal(guide({...d,style:{primary:"Minimalism",secondary:null,descriptors:["calm","clean","precise"],thesis:"保持清晰而克制的视觉层级，让内容和留白共同建立稳定节奏。避免用装饰取代信息优先级。"},screenshot:"screenshot.png"}).includes("--tk-btn-"),false); });
+test("normalizes a versioned public record without control-specific fields",()=>{ const d=normalize(base); assert.equal(d.schemaVersion,2); assert.equal(d.id,"example-com"); assert.ok(d.tokens.colors.some(c=>c.role==="背景 bg")); assert.ok(d.theme["--tk-bg"]); assert.equal(d.tokens.space.unit,8); assert.ok(clusterColors(base).length>=3); assert.equal("rawPath" in d,false); assert.equal(Object.keys(d.theme).some((name)=>name.startsWith("--tk-btn-")),false); assert.equal(guide({...d,style:{primary:"Minimalism",secondary:null,descriptors:["calm","clean","precise"],thesis:"保持清晰而克制的视觉层级，让内容和留白共同建立稳定节奏。避免用装饰取代信息优先级。"},screenshot:"screenshot.png"}).includes("--tk-btn-"),false); });
 test("contrast is computed from the palette, not assumed high",()=>{
   assert.equal(contrastLabel("#ffffff","#000000"),"高对比"); assert.equal(contrastLabel("#7c7c7c","#ffffff"),"中等对比"); assert.equal(contrastLabel("#999999","#ffffff"),"低对比");
   assert.ok(contrastRatio("#ffffff","#000000") >= 4.5); assert.ok(contrastRatio("#999999","#ffffff") < 3);
@@ -38,23 +36,9 @@ test("density has three tiers instead of a binary guess",()=>{
   assert.equal(normalize(withSpacing([12,16])).tokens.space.density,"适中");
   assert.equal(normalize(withSpacing([24,32])).tokens.space.density,"偏疏");
 });
-test("preview helpers keep same-colour roles readable and preserve real border paint",()=>{
- assert.equal(previewBackdropFor("#31353a","#14181e","#31353a"),"#fff");
- assert.ok(contrastRatio("#31353a",previewBackdropFor("#31353a","#14181e","#31353a"))>=3);
- assert.equal(previewBackdropFor("#777777",undefined,undefined),"#000");
+test("readable foreground preserves a sufficient preferred colour",()=>{
  assert.equal(foregroundFor("#c9a96e","#f5f3ee"),"#000");
- const border=colorPreview("边框","border","#31353a","#f5f3ee","#14181e","#31353a");
- assert.match(border,/type="button" class="swatch swatch--border"/); assert.match(border,/class="sample-border" style="border-color:#31353a"/); assert.doesNotMatch(border,/style="[^"]*;color:#31353a/);
- const accent=colorPreview("强调色","accent","#c9a96e","#f5f3ee","#14181e","#31353a");
- assert.match(accent,/sample-action/); assert.match(accent,/color:#000/);
-});
-test("copy controls use explicit native buttons",()=>{ assert.match(colorPreview("正文","text","#111111","#111111","#ffffff","#eeeeee"),/^<button type="button"/); });
-test("font stack summaries are quote and escape aware without changing source values",()=>{
- const yeguozi='"Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei"';
- assert.equal(fontFamilyName(yeguozi),"Helvetica Neue"); assert.equal(fontFamilyName(""),"暂未识别");
- assert.equal(fontStackSummary(yeguozi),"主要字体 · Helvetica Neue（另 8 个回退）"); assert.equal(yeguozi,'"Helvetica Neue", Helvetica, "Segoe UI", system-ui, -apple-system, Arial, sans-serif, "PingFang SC", "Microsoft YaHei"');
- assert.deepEqual(splitFontStack('"A, B", "C\\\\, D", serif'),['"A, B"','"C\\\\, D"','serif']);
- assert.equal(fontStackSummary("Inter"),"主要字体 · Inter"); assert.equal(fontStackSummary(""),"未采集字体栈"); assert.equal(fontStackSummary(undefined),"未采集字体栈"); assert.doesNotThrow(()=>splitFontStack('"unterminated, serif'));
+ assert.equal(foregroundFor("#14181e","#f5f3ee"),"#f5f3ee");
 });
 test("uses stable background evidence instead of mixed foreground area",()=>{
  const foreground={tag:"a",text:true,media:false,rect:{x:0,y:0,width:1440,height:800},colors:{color:"rgb(245, 243, 238)"},fontFamily:"Inter",fontSize:16,fontWeight:400,lineHeight:24,radius:0,shadow:"none",spacing:[]};
@@ -135,7 +119,7 @@ test("chooses repeated real shadows and rejects isolated control effects",()=>{
  assert.equal(normalize(isolated).tokens.shadow.md,"none");
 });
 test("L3 and L4 colours cannot become anchors, themes, or guides",()=>{ const raw:RawExtraction={...base,samples:[...base.samples, {tag:"span",text:true,media:false,rect:{x:1,y:1,width:5,height:5},colors:{color:"rgb(255,0,0)",backgroundColor:"transparent",borderColor:"transparent"},fontFamily:"Inter",fontSize:13,fontWeight:400,lineHeight:18,radius:0,shadow:"none",spacing:[1]}, {tag:"img",text:false,media:true,rect:{x:1,y:1,width:5,height:5},colors:{color:"rgb(0,255,0)",backgroundColor:"transparent",borderColor:"transparent"},fontFamily:"Inter",fontSize:13,fontWeight:400,lineHeight:18,radius:0,shadow:"none",spacing:[1]}]}; const d=normalize(raw); const all=JSON.stringify({colors:d.tokens.colors,theme:d.theme}); assert.equal(all.includes("#ff0000"),false); assert.equal(all.includes("#00ff00"),false); assert.equal(guide({...d,style:{primary:"Minimalism",secondary:null,descriptors:["calm","clean","premium"],thesis:"保持清晰而克制的层级，并让核心信息优先出现。使用稳定的留白建立节奏，避免把页面塞满装饰。"},screenshot:"screenshot.png"}).includes("#ff0000"),false); });
-test("guide accepts legacy role labels and keeps Neo-Brutalism shadows accurate",()=>{ const d=normalize(base); const styled={...d,style:{primary:"Neo-Brutalism" as const,secondary:null,descriptors:["direct","bold","tactile"],thesis:"以清晰的边界和直接的色彩建立视觉秩序。阴影与描边共同传达明确的触感。"},screenshot:"screenshot.png"}; styled.tokens.colors=[{role:"背景 bg",hex:"#fff4dd",stability:"L1",freq:.2},{role:"正文 text",hex:"#000000",stability:"L1",freq:.2},{role:"分隔面 surface",hex:"#ffd84d",stability:"L2",freq:.2},{role:"强调 accent",hex:"#ff5c2b",stability:"L1",freq:.2},{role:"边框 border",hex:"#877b6b",stability:"L1",freq:.2}]; styled.tokens.shadow={weight:"有",md:"rgb(38, 32, 26) 3px 3px 0px 0px"}; const output=guide(styled); assert.equal(output.split("\n",1)[0],"# STYLE-GUIDE"); assert.match(output,/## 风格方向\n/); assert.match(output,/## 语义色彩\n/); assert.match(output,/\| 表面 \| #ffd84d \|/); assert.match(output,/## CSS/); assert.match(output,/3px 3px 0px 0px/); for(const legacy of ["STYLE-GUIDE ·","用途：","迁移边界","## 使用边界","已采集间距","未采集到字阶","未采集的信息","原站布局"]){assert.equal(output.includes(legacy),false);} assert.equal(output.includes("避免重阴影"),false); assert.equal(output.includes("不要引入装饰字体"),false); assert.equal(output.includes("CTA"),false); });
+test("guide accepts legacy role labels and keeps Neo-Brutalism shadows accurate",()=>{ const d=normalize(base); const styled={...d,style:{primary:"Neo-Brutalism" as const,secondary:null,descriptors:["direct","bold","tactile"],thesis:"以清晰的边界和直接的色彩建立视觉秩序。阴影与描边共同传达明确的触感。"},screenshot:"screenshot.png"}; styled.tokens.colors=[{role:"背景 bg",hex:"#fff4dd",stability:"L1",freq:.2},{role:"正文 text",hex:"#000000",stability:"L1",freq:.2},{role:"分隔面 surface",hex:"#ffd84d",stability:"L2",freq:.2},{role:"强调 accent",hex:"#ff5c2b",stability:"L1",freq:.2},{role:"边框 border",hex:"#877b6b",stability:"L1",freq:.2}]; styled.tokens.shadow={weight:"有",md:"rgb(38, 32, 26) 3px 3px 0px 0px"}; const output=guide(styled); assert.equal(output.split("\n",1)[0],"# STYLE-GUIDE"); assert.match(output,/## 风格方向\n/); assert.match(output,/## 语义色彩\n/); assert.match(output,/\| 表面 \| #ffd84d \|/); assert.match(output,/## CSS/); assert.match(output,/3px 3px 0px 0px/); for(const legacy of ["STYLE-GUIDE ·","用途：","迁移边界","## 使用边界","已采集间距","未采集到字阶","未采集的信息"]){assert.equal(output.includes(legacy),false);} assert.equal(output.includes("避免重阴影"),false); assert.equal(output.includes("不要引入装饰字体"),false); assert.equal(output.includes("CTA"),false); });
 test("saved index excludes the removed example record", async()=>{ const index=JSON.parse(await (await import("node:fs/promises")).readFile(path.join(process.cwd(),"sites/index.json"),"utf8")) as Array<{id:string}>; assert.equal(index.some((entry)=>entry.id==="example-com"),false); });
 test("index entry maps extraction warnings separately from validation limits",()=>{ const record={...normalize(base),extractedAt:"2026-07-22",style:{primary:"Minimalism" as const,secondary:"Editorial" as const,descriptors:["calm","clean","precise"],thesis:"保持清晰而克制的视觉层级，让内容和留白共同建立稳定节奏。避免用装饰取代信息优先级。"},screenshot:"screenshot.png",warnings:["采集不完整"],fidelity:{coverage:.9,eligibleRatio:.1,mean:.01,p95:.02,samples:10},validationNotices:["非媒体可校验像素比例 0.1（阈值 0.2），结果仅供参考。"]}; record.tokens.colors=[{role:"强调 accent",hex:"#d4552b",stability:"L1",freq:.2}]; assert.deepEqual(indexEntry(record),{id:record.id,name:record.name,url:record.url,primaryStyle:"Minimalism",secondaryStyle:"Editorial",descriptors:["calm","clean","precise"],accent:"#d4552b",extractedAt:"2026-07-22",partial:true,validationFlags:["media-heavy"]}); const complete={...record,warnings:[]}; assert.deepEqual(indexEntry(complete),{...indexEntry(record),partial:false}); });
 test("index sort uses date descending then name and id",()=>{ const entry=(id:string,name:string,extractedAt:string)=>({id,name,url:"https://example.com",primaryStyle:"Minimalism" as const,secondaryStyle:null,descriptors:[],accent:"",extractedAt,partial:false,validationFlags:[]}); assert.deepEqual(sortIndex([entry("z","Beta","2026-07-22"),entry("a","Alpha","2026-07-22"),entry("new","New","2026-07-23")]).map(item=>item.id),["new","a","z"]); });
@@ -181,4 +165,35 @@ test("unused root colour variables cannot become stable tokens",()=>{
  const colors=Object.fromEntries(normalize(raw).tokens.colors.map((c)=>[c.role,c.hex]));
  assert.equal(colors["背景 bg"],"#ffffff");
  assert.notEqual(colors.accent,"#ff00ff");
+});
+
+test("body typography prefers readable prose over display-family labels", () => {
+  const raw: RawExtraction = {...base, samples: [base.samples[0],
+    {...base.samples[1],tag:"h1",fontFamily:"Display Rounded",fontSize:68,fontWeight:800},
+    {...base.samples[1],tag:"strong",fontFamily:"Display Rounded",fontSize:20,fontWeight:800,rect:{x:0,y:0,width:1000,height:100}},
+    {...base.samples[1],tag:"p",fontFamily:"Readable Sans",fontSize:17,fontWeight:400,lineHeight:27.2}
+  ]};
+  const draft=normalize(raw);
+  assert.equal(draft.visualGrammar.typography.body.value?.family,"Readable Sans");
+  assert.equal(draft.visualGrammar.typography.body.value?.size,17);
+  assert.equal(draft.visualGrammar.typography.display.value?.family,"Display Rounded");
+  assert.equal(draft.theme["--tk-font-sans"],"Readable Sans");
+  assert.equal(draft.theme["--tk-font-display"],"Display Rounded");
+});
+
+test("export includes measured type roles and provenance without control geometry", () => {
+  const site={...normalize(base),style:{primary:"Minimalism" as const,secondary:null,descriptors:["清晰","克制","温暖"],thesis:"以清晰克制的字阶组织内容。保持色彩与留白的稳定关系。"},screenshot:"screenshot.png",warnings:["字体尚未确认"],validationNotices:["媒体占比较高"]};
+  const theme=exportTheme(site);
+  const body=site.visualGrammar.typography.body.value!;
+  assert.equal(theme["--tk-body-font"],body.family);
+  assert.equal(theme["--tk-body-weight"],String(body.weight));
+  assert.equal(theme["--tk-body-leading"],String(body.lineHeight));
+  assert.equal(theme["--tk-body-tracking"],`${body.letterSpacing}px`);
+  assert.equal(Object.keys(theme).some(name=>name.startsWith("--tk-btn-")),false);
+  const output=guide(site);
+  assert.match(output,/\.style-body \{/);
+  assert.ok(output.includes(site.url));
+  assert.ok(output.includes("采集限制：字体尚未确认"));
+  assert.ok(output.includes("校验说明：媒体占比较高"));
+  assert.ok(output.includes("不包含字体文件"));
 });

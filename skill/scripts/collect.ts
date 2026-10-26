@@ -13,23 +13,30 @@ const SCROLL_OFFSETS = [0, 450, 1200] as const;
 
 /** Browser-side sampling payload (stringified so tsx helpers never leak into the page). */
 const SAMPLE_SCRIPT = `(() => {
-  const rect = (r) => ({ x: Math.max(0, r.x), y: Math.max(0, r.y), width: r.width, height: r.height });
-  const mediaTag = new Set(["IMG", "VIDEO", "CANVAS", "SVG", "PICTURE", "PATH", "POLYLINE", "POLYGON", "LINE", "CIRCLE", "ELLIPSE", "RECT", "USE", "TEXT", "TSPAN", "G"]);
+  const rect = (r) => {
+    const left = Math.max(0, r.left), top = Math.max(0, r.top);
+    const right = Math.min(innerWidth, r.right), bottom = Math.min(innerHeight, r.bottom);
+    return { x: left, y: top, width: Math.max(0, right - left), height: Math.max(0, bottom - top) };
+  };
+  const mediaTag = new Set(["IMG", "VIDEO", "CANVAS", "SVG", "PICTURE", "IFRAME", "OBJECT", "EMBED", "PATH", "POLYLINE", "POLYGON", "LINE", "CIRCLE", "ELLIPSE", "RECT", "USE", "TEXT", "TSPAN", "G"]);
   const isMedia = (el) => {
     if (mediaTag.has(el.tagName)) return true;
     if (el.closest && (el.closest("svg") || el.closest("canvas") || el.closest("picture") || el.closest("video"))) return true;
     return false;
   };
   const nodes = [document.documentElement, document.body, ...document.querySelectorAll("body *")];
-  const samples = nodes.map((el) => {
-    const cs = getComputedStyle(el), r = el.getBoundingClientRect();
+  const samples = nodes.flatMap((el) => {
+    if (!el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return [];
+    const cs = getComputedStyle(el), bounds = rect(el.getBoundingClientRect());
+    if (cs.contentVisibility === "hidden" || bounds.width <= 1 || bounds.height <= 1) return [];
     const media = isMedia(el);
-    return {
+    return [{
       tag: el.tagName.toLowerCase(),
       root: el === document.documentElement || el === document.body,
-      text: !!el.textContent?.trim() && el.children.length === 0,
+      text: [...el.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim()),
       media,
-      rect: rect(r),
+      backgroundMedia: /(?:^|\\s)(?:url|image-set)\\(/.test(cs.backgroundImage),
+      rect: bounds,
       colors: { color: cs.color, backgroundColor: cs.backgroundColor, borderColor: cs.borderColor },
       fontFamily: cs.fontFamily,
       fontSize: parseFloat(cs.fontSize),
@@ -44,11 +51,11 @@ const SAMPLE_SCRIPT = `(() => {
       radius: parseFloat(cs.borderRadius) || 0,
       shadow: cs.boxShadow,
       spacing: [cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft, cs.marginTop, cs.marginRight, cs.marginBottom, cs.marginLeft].map(parseFloat)
-    };
-  }).filter((x) => x.rect.width > 1 && x.rect.height > 1 && x.rect.y < innerHeight && x.rect.y + x.rect.height > 0).slice(0, 2500);
+    }];
+  }).slice(0, 2500);
   const root = getComputedStyle(document.documentElement);
   const rootVariables = Object.fromEntries([...root].filter((x) => x.startsWith("--")).map((x) => [x, root.getPropertyValue(x).trim()]));
-  return { samples, rootVariables, mediaRects: samples.filter((x) => x.media).map((x) => x.rect) };
+  return { samples: samples.map(({ backgroundMedia, ...sample }) => sample), rootVariables, mediaRects: samples.filter((x) => x.media || x.backgroundMedia).map((x) => x.rect) };
 })()`;
 
 async function captureEvidence(page: Page, evidenceDir: string, name: string, note: string, url: string) {
@@ -161,8 +168,10 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
     // Primary token screenshot and DOM sample stay on the first-screen frame.
     await page.evaluate(() => window.scrollTo(0, 0));
     await settle(page);
-    await page.screenshot({ path: path.join(stagingDir, "screenshot.png"), fullPage: false });
-    evidence.push(await captureEvidence(page, evidenceDir, "primary-top", "Primary page top (token sample frame)", page.url()));
+    const screenshot = path.join(stagingDir, "screenshot.png");
+    await page.screenshot({ path: screenshot, fullPage: false });
+    await copyFile(screenshot, path.join(evidenceDir, "primary-top.png"));
+    evidence.push({ name: "primary-top", note: "Primary page top (token sample frame)", url: page.url(), file: "primary-top.png" });
 
     // A string is intentionally used here: tsx/esbuild may inject helpers into a
     // serialized TypeScript callback, but the browser context cannot resolve them.

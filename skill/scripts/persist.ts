@@ -3,6 +3,8 @@ import path from "node:path";
 import { STYLE_VOCABULARY, type Draft, type FidelityResult, type IndexEntry, type Judgment, type SiteRecord, type ValidationFlag } from "./schema.js";
 import { fidelity } from "./verify.js";
 const legal = new Set<string>(STYLE_VOCABULARY);
+const TYPE_ROLES = ["display", "body", "meta"] as const;
+const VALIDATION_FLAGS = new Set<string>(["palette-low", "media-heavy", "unavailable"]);
 export function validateJudgment(value: unknown): Judgment {
   if (!value || typeof value !== "object") throw new Error("judgment.json 必须是对象。"); const j=value as Record<string,unknown>;
   const keys=Object.keys(j).sort(); if(keys.join(",")!=="descriptors,primary,secondary,thesis") throw new Error("judgment.json 只能包含 primary、secondary、descriptors、thesis。");
@@ -54,6 +56,27 @@ export function fidelityNotices(result: Pick<FidelityResult, "coverage" | "eligi
   if(result.eligibleRatio<.2) notices.push(`非媒体可校验像素比例 ${result.eligibleRatio}（阈值 0.2），结果仅供参考。`);
   return notices;
 }
+export function exportTheme(site: SiteRecord): Record<string, string> {
+  const theme = Object.fromEntries(Object.entries(site.theme).filter(([name]) => !name.startsWith("--tk-btn-")));
+  for (const role of TYPE_ROLES) {
+    const value = site.visualGrammar?.typography?.[role]?.value;
+    if (!value) continue;
+    theme[`--tk-${role}-font`] = value.family;
+    theme[`--tk-${role}-size`] = `${value.size}px`;
+    theme[`--tk-${role}-weight`] = String(value.weight);
+    theme[`--tk-${role}-leading`] = String(value.lineHeight);
+    theme[`--tk-${role}-tracking`] = `${value.letterSpacing}px`;
+    theme[`--tk-${role}-style`] = value.fontStyle;
+    theme[`--tk-${role}-transform`] = value.textTransform;
+  }
+  const stroke = site.visualGrammar?.stroke?.value;
+  if (stroke) {
+    theme["--tk-stroke-width"] = `${stroke.primary}px`;
+    theme["--tk-stroke-style"] = stroke.style;
+  }
+  return theme;
+}
+
 export function guide(site: SiteRecord): string {
   const t = site.tokens;
   const grammar = site.visualGrammar;
@@ -73,18 +96,70 @@ export function guide(site: SiteRecord): string {
     : `- ${label}：未可靠采集`;
   const value = (signal: { value: unknown } | undefined) => typeof signal?.value === "string" ? signal.value : "未可靠采集";
   const stroke = grammar.stroke.value ? `${grammar.stroke.value.character}，${grammar.stroke.value.widths.map((width) => `${width}px`).join(" / ")} ${grammar.stroke.value.style}` : "未可靠采集";
-  const css = Object.entries(site.theme).map(([name, value]) => `  ${name}: ${value};`).join("\n");
-  return `# STYLE-GUIDE\n\n## 风格方向\n主风格：${site.style.primary}${site.style.secondary ? ` · 次风格：${site.style.secondary}` : ""}\n气质词：${site.style.descriptors.join(" / ")}\n${site.style.thesis}\n\n## 语义色彩\n| 用途 | 色值 | 使用方式 |\n| --- | --- | --- |\n| 背景 | ${color(site, "background")} | ${usage.background} |\n| 表面 | ${color(site, "surface")} | ${usage.surface} |\n| 正文 | ${color(site, "text")} | ${usage.text} |\n| 次要文字 | ${color(site, "muted")} | ${usage.muted} |\n| 强调 | ${color(site, "accent")} | ${usage.accent} |\n| 边框 | ${color(site, "border")} | ${usage.border} |\n\n## 字体系统\n${roleLine("展示文字", grammar.typography.display)}\n${roleLine("正文", grammar.typography.body)}\n${roleLine("元信息", grammar.typography.meta)}\n- 字体关系：${value(grammar.typography.pairing)}\n- 对比：${t.typography.contrast}。字阶范围 ${min?.px ?? 0}–${max?.px ?? 0}px。\n${scale.length ? scale.map((item) => `- ${item.role}：${item.px}px / ${item.w} / ${item.lh}`).join("\n") : "- 字阶未定义。"}\n\n## 复合视觉语法\n- 色彩模式：${value(grammar.palette.mode)}；${value(grammar.palette.allocation)}；${value(grammar.palette.accentRule)}。\n- 描边：${stroke}。\n- 表面：${value(grammar.surface)}。\n- 层次：${value(grammar.elevation)}。\n- 形态：${value(grammar.shape)}。\n- 间距节奏：${value(grammar.spacing)}。\n- 元素特征：${grammar.elementTraits.length ? grammar.elementTraits.join(" / ") : "未可靠采集"}。\n\n## 间距与形态\n- 间距基准：${t.space.unit}px；整体密度：${t.space.density}。\n- 间距阶梯：${t.space.scale.length ? t.space.scale.map((item) => `${item}px`).join(" / ") : "未定义"}。\n- 圆角：${t.radius.tendency}（${t.radius.sm}px / ${t.radius.md}px / ${t.radius.lg}px）。\n- 阴影：${t.shadow.weight}${t.shadow.weight === "有" ? `，${t.shadow.md}` : ""}。\n\n## CSS\n\`\`\`css\n:root {\n${css}\n}\n\`\`\`\n`;
+  const css = Object.entries(exportTheme(site)).map(([name, value]) => `  ${name}: ${value};`).join("\n");
+  const roleCss = TYPE_ROLES.filter((role) => Boolean(grammar.typography[role]?.value)).map((role) => `.style-${role} {
+  font-family: var(--tk-${role}-font);
+  font-size: var(--tk-${role}-size);
+  font-weight: var(--tk-${role}-weight);
+  line-height: var(--tk-${role}-leading);
+  letter-spacing: var(--tk-${role}-tracking);
+  font-style: var(--tk-${role}-style);
+  text-transform: var(--tk-${role}-transform);
+}`).join("\n\n");
+  const fontFamilies = [...new Set(TYPE_ROLES.map((role) => grammar.typography[role]).flatMap((signal) => signal?.value?.family ? [signal.value.family] : []))];
+  const notes = [
+    `- 来源：${site.url}`,
+    `- 采集日期：${site.extractedAt}`,
+    "- 先加载对应字体，再应用角色样式；仅声明字体名称不会安装或下载字体。本风格包不包含字体文件。",
+    ...fontFamilies.map((family) => `- 字体栈：${family}`),
+    "- 将 .style-display 用于展示文字、.style-body 用于正文、.style-meta 用于辅助文字，并用语义色变量设置背景与文本。",
+    "- 优先保留展示字与正文的关系、背景与表面的层次、强调色比例、描边和阴影。角色字号为采样值，按目标内容和屏幕调整。",
+    "- 色彩与角色 CSS 用于你的内容；原站布局、图片、图表和数据不在风格包中。",
+    ...site.warnings.map((warning) => `- 采集限制：${warning}`),
+    ...(site.evidenceNotes || []).map((note) => `- 证据补充：${note}`),
+    ...(site.validationNotices || []).map((notice) => `- 校验说明：${notice}`),
+    "- 调色板覆盖率仅验证采样画面的颜色，不是整体相似度。",
+  ].join("\n");
+  return `# STYLE-GUIDE\n\n## 风格方向\n主风格：${site.style.primary}${site.style.secondary ? ` · 次风格：${site.style.secondary}` : ""}\n气质词：${site.style.descriptors.join(" / ")}\n${site.style.thesis}\n\n## 语义色彩\n| 用途 | 色值 | 使用方式 |\n| --- | --- | --- |\n| 背景 | ${color(site, "background")} | ${usage.background} |\n| 表面 | ${color(site, "surface")} | ${usage.surface} |\n| 正文 | ${color(site, "text")} | ${usage.text} |\n| 次要文字 | ${color(site, "muted")} | ${usage.muted} |\n| 强调 | ${color(site, "accent")} | ${usage.accent} |\n| 边框 | ${color(site, "border")} | ${usage.border} |\n\n## 字体系统\n${roleLine("展示文字", grammar.typography.display)}\n${roleLine("正文", grammar.typography.body)}\n${roleLine("元信息", grammar.typography.meta)}\n- 字体关系：${value(grammar.typography.pairing)}\n- 对比：${t.typography.contrast}。字阶范围 ${min?.px ?? 0}–${max?.px ?? 0}px。\n${scale.length ? scale.map((item) => `- ${item.role}：${item.px}px / ${item.w} / ${item.lh}`).join("\n") : "- 字阶未定义。"}\n\n## 复合视觉语法\n- 色彩模式：${value(grammar.palette.mode)}；${value(grammar.palette.allocation)}；${value(grammar.palette.accentRule)}。\n- 描边：${stroke}。\n- 表面：${value(grammar.surface)}。\n- 层次：${value(grammar.elevation)}。\n- 形态：${value(grammar.shape)}。\n- 间距节奏：${value(grammar.spacing)}。\n- 元素特征：${grammar.elementTraits.length ? grammar.elementTraits.join(" / ") : "未可靠采集"}。\n\n## 间距与形态\n- 间距基准：${t.space.unit}px；整体密度：${t.space.density}。\n- 间距阶梯：${t.space.scale.length ? t.space.scale.map((item) => `${item}px`).join(" / ") : "未定义"}。\n- 圆角：${t.radius.tendency}（${t.radius.sm}px / ${t.radius.md}px / ${t.radius.lg}px）。\n- 阴影：${t.shadow.weight}${t.shadow.weight === "有" ? `，${t.shadow.md}` : ""}。\n\n## CSS\n\`\`\`css\n:root {\n${css}\n}\n\n${roleCss}\n\`\`\`\n\n## 复用与来源\n${notes}\n`;
 }
 async function atomicJson(file:string, value:unknown) { const tmp=`${file}.${process.pid}.tmp`; await writeFile(tmp,JSON.stringify(value,null,2)+"\n"); await rename(tmp,file); }
+function missingPath(error: unknown): boolean { return (error as NodeJS.ErrnoException | undefined)?.code === "ENOENT"; }
+function isIndexEntry(value: unknown): value is IndexEntry {
+  if (!value || typeof value !== "object") return false;
+  const entry = value as Record<string, unknown>;
+  return ["id", "name", "url", "accent", "extractedAt"].every((key) => typeof entry[key] === "string")
+    && typeof entry.primaryStyle === "string" && legal.has(entry.primaryStyle)
+    && (entry.secondaryStyle === null || typeof entry.secondaryStyle === "string" && legal.has(entry.secondaryStyle))
+    && Array.isArray(entry.descriptors) && entry.descriptors.every((item) => typeof item === "string")
+    && typeof entry.partial === "boolean"
+    && Array.isArray(entry.validationFlags) && entry.validationFlags.every((flag) => typeof flag === "string" && VALIDATION_FLAGS.has(flag));
+}
+async function readIndex(indexFile: string): Promise<IndexEntry[]> {
+  let value: unknown;
+  try { value=JSON.parse(await readFile(indexFile,"utf8")); }
+  catch (error) {
+    if (missingPath(error)) return [];
+    throw new Error(`无法读取 sites/index.json：${error instanceof Error ? error.message : String(error)}`);
+  }
+  if (!Array.isArray(value)) throw new Error("sites/index.json 必须是数组。");
+  if (!value.every(isIndexEntry)) throw new Error("sites/index.json 包含无效条目。");
+  if (new Set(value.map((entry) => entry.id)).size !== value.length) throw new Error("sites/index.json 包含重复 ID。");
+  return value;
+}
 export async function finalize(draft: Draft, judgment: unknown, workDir=process.cwd()): Promise<SiteRecord> {
   const style=validateJudgment(judgment), staging=path.join(workDir,".style-extractor",draft.id), screenshot=path.join(staging,"screenshot.png"); const raw=JSON.parse(await readFile(path.join(staging,"raw.json"),"utf8"));
   const record:SiteRecord={...draft,style,screenshot:"screenshot.png",validationNotices:[]};
+  const primaryScreenshot=path.join(staging,"evidence","primary-top.png");
   try {
-    record.fidelity=await fidelity(path.join(staging,"evidence","primary-top.png"),raw,record.tokens);
+    try { record.fidelity=await fidelity(primaryScreenshot,raw,record.tokens); }
+    catch (error) {
+      if (!missingPath(error)) throw error;
+      record.fidelity=await fidelity(screenshot,raw,record.tokens);
+    }
     record.validationNotices=fidelityNotices(record.fidelity);
   } catch { record.validationNotices=["无法完成截图保真校验，结果仅供参考。"] }
+  const indexFile=path.join(workDir,"sites","index.json"); const index=await readIndex(indexFile);
+  const nextIndex=sortIndex([...index.filter(x=>x.id!==record.id),indexEntry(record)]);
   const target=path.join(workDir,"sites",draft.id); await mkdir(target,{recursive:true}); await copyFile(screenshot,path.join(target,"screenshot.png")); await atomicJson(path.join(target,"site.json"),record); await writeFile(path.join(target,"STYLE-GUIDE.md"),guide(record));
-  const indexFile=path.join(workDir,"sites","index.json"); let index:IndexEntry[]=[]; try { index=JSON.parse(await readFile(indexFile,"utf8")); } catch { /* initialized below */ }
-  index=sortIndex([...index.filter(x=>x.id!==record.id),indexEntry(record)]); await atomicJson(indexFile,index); return record;
+  await atomicJson(indexFile,nextIndex); return record;
 }

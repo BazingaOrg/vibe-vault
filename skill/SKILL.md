@@ -42,7 +42,7 @@ The first-screen primary view is the only token sample. Scroll views and same-ho
 
 ## Choose the gallery cover
 
-Keep `screenshot.png` unless the primary frame is dominated by a chart, dashboard, consent layer, or large media. When another evidence frame shows the same type, color, and surface system more clearly, copy it over `screenshot.png` before finalizing. The internal palette check always uses the unchanged `evidence/primary-top.png`. Do not change the record URL unless the user requested a specific subpage.
+Keep `screenshot.png` unless the primary frame is dominated by a chart, dashboard, consent layer, or large media. When another evidence frame shows the same type, color, and surface system more clearly, copy it over `screenshot.png` before finalizing. The internal palette check uses the unchanged `evidence/primary-top.png`; older collections without that frame fall back to `screenshot.png`. Do not change the record URL unless the user requested a specific subpage.
 
 ## Finalize
 
@@ -67,6 +67,17 @@ Read the three generated site files and `sites/index.json`. Confirm:
 - warnings describe primary extraction quality only;
 - optional evidence notes did not set `partial`;
 - the result contains no invented role, layout, or component rule.
+
+## Presentation check
+
+The gallery is a style collection, not a token inspector. Its primary content is the selected site's name, concise visual direction, descriptors, a source screenshot, and copy/download actions. Tokens and visual grammar remain in the record and exported guide, with executable display/body/meta role CSS; extraction warnings, validation notices, provenance and font-loading requirements remain in the exported guide. The gallery only shows a short status when extraction is incomplete.
+
+After finalizing, review the selected style in the gallery against the source evidence:
+
+1. Confirm the display/body type relationship, base/surface/text hierarchy, accent restraint, stroke, radius and elevation convey the measured visual direction together.
+2. Check that page text and controls remain readable in both light and dark themes. Readability adjustments in the gallery do not change the source tokens or the exported guide.
+3. Treat missing fonts as a presentation limitation, not a reason to invent replacement source measurements. Distinguish captured font stacks from fonts actually available in the gallery.
+4. Keep source screenshots as evidence, not as proof that the gallery reconstructs the source's components, layout, imagery or data. Palette coverage alone does not pass this presentation check.
 
 ## Report
 
