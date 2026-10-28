@@ -1,5 +1,23 @@
 [
   {
+    "id": "lex-qiaomu-ai",
+    "name": "Lex Qiaomu",
+    "url": "https://lex.qiaomu.ai/en/",
+    "primaryStyle": "Editorial",
+    "secondaryStyle": "Minimalism",
+    "descriptors": [
+      "报刊式",
+      "克制",
+      "衬线标题",
+      "墨色层级",
+      "高对比"
+    ],
+    "accent": "#111111",
+    "extractedAt": "2026-10-28",
+    "partial": false,
+    "validationFlags": []
+  },
+  {
     "id": "codex-resets-com",
     "name": "Codex Resets",
     "url": "https://codex-resets.com/",

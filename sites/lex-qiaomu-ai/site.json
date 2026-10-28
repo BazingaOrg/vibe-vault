@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 2,
+  "id": "lex-qiaomu-ai",
+  "name": "Lex Qiaomu",
+  "url": "https://lex.qiaomu.ai/en/",
+  "extractedAt": "2026-10-28",
+  "tokens": {
+    "colors": [
+      {
+        "role": "背景 bg",
+        "hex": "#ffffff",
+        "stability": "L1",
+        "freq": 0.056
+      },
+      {
+        "role": "surface",
+        "hex": "#f5f5f3",
+        "stability": "L1",
+        "freq": 0.056
+      },
+      {
+        "role": "text",
+        "hex": "#111111",
+        "stability": "L1",
+        "freq": 0.645
+      },
+      {
+        "role": "muted",
+        "hex": "#6b6b67",
+        "stability": "L1",
+        "freq": 0.185
+      },
+      {
+        "role": "accent",
+        "hex": "#111111",
+        "stability": "L1",
+        "freq": 0.645
+      },
+      {
+        "role": "border",
+        "hex": "#2e2e2c",
+        "stability": "L2",
+        "freq": 0.048
+      }
+    ],
+    "typography": {
+      "fontSans": "\"Libre Caslon Text\", \"Noto Serif SC\", \"Songti SC\", \"Source Han Serif SC\", STSong, Georgia, serif",
+      "contrast": "高对比",
+      "scale": [
+        {
+          "role": "Body",
+          "px": 15,
+          "w": 400,
+          "lh": 1.4
+        },
+        {
+          "role": "Body",
+          "px": 16,
+          "w": 400,
+          "lh": 1.6
+        },
+        {
+          "role": "H3",
+          "px": 24,
+          "w": 700,
+          "lh": 1.6
+        },
+        {
+          "role": "H2",
+          "px": 40,
+          "w": 700,
+          "lh": 1.32
+        },
+        {
+          "role": "H1",
+          "px": 64,
+          "w": 700,
+          "lh": 1.1
+        }
+      ]
+    },
+    "space": {
+      "unit": 4,
+      "density": "紧凑",
+      "scale": [
+        3,
+        4,
+        5,
+        6,
+        8,
+        10,
+        12,
+        14
+      ]
+    },
+    "radius": {
+      "tendency": "较克制",
+      "sm": 4,
+      "md": 4,
+      "lg": 4
+    },
+    "shadow": {
+      "weight": "无",
+      "md": "none"
+    }
+  },
+  "visualGrammar": {
+    "typography": {
+      "display": {
+        "value": {
+          "family": "\"Libre Caslon Text\", \"Noto Serif SC\", \"Songti SC\", \"Source Han Serif SC\", STSong, Georgia, serif",
+          "size": 64,
+          "weight": 700,
+          "lineHeight": 1.1,
+          "letterSpacing": -0.32,
+          "fontStyle": "normal",
+          "textTransform": "none"
+        },
+        "source": "measured",
+        "confidence": "high"
+      },
+      "body": {
+        "value": {
+          "family": "-apple-system, \"system-ui\", \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans SC\", \"Noto Sans CJK SC\", sans-serif",
+          "size": 14,
+          "weight": 400,
+          "lineHeight": 1.6,
+          "letterSpacing": 0,
+          "fontStyle": "normal",
+          "textTransform": "none"
+        },
+        "source": "measured",
+        "confidence": "high"
+      },
+      "meta": {
+        "value": {
+          "family": "-apple-system, \"system-ui\", \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans SC\", \"Noto Sans CJK SC\", sans-serif",
+          "size": 11,
+          "weight": 500,
+          "lineHeight": 1,
+          "letterSpacing": 0,
+          "fontStyle": "normal",
+          "textTransform": "none"
+        },
+        "source": "measured",
+        "confidence": "high"
+      },
+      "pairing": {
+        "value": "展示字体与正文字体形成对照",
+        "source": "inferred",
+        "confidence": "high"
+      }
+    },
+    "palette": {
+      "mode": {
+        "value": "浅色基底",
+        "source": "inferred",
+        "confidence": "high"
+      },
+      "allocation": {
+        "value": "背景与承载面分层，中性色占主导",
+        "source": "inferred",
+        "confidence": "high"
+      },
+      "accentRule": {
+        "value": "强调色参与主要层级",
+        "source": "inferred",
+        "confidence": "medium"
+      }
+    },
+    "stroke": {
+      "value": {
+        "widths": [
+          1,
+          2
+        ],
+        "primary": 1,
+        "style": "solid",
+        "character": "细线与强调描边并用"
+      },
+      "source": "measured",
+      "confidence": "high"
+    },
+    "surface": {
+      "value": "背景与承载面分层，中性色占主导",
+      "source": "inferred",
+      "confidence": "high"
+    },
+    "elevation": {
+      "value": "平面，无外部投影",
+      "source": "inferred",
+      "confidence": "medium"
+    },
+    "shape": {
+      "value": "克制小圆角",
+      "source": "inferred",
+      "confidence": "high"
+    },
+    "spacing": {
+      "value": "紧凑节奏",
+      "source": "inferred",
+      "confidence": "medium"
+    },
+    "elementTraits": [
+      "字体角色对照",
+      "细线与强调描边并用",
+      "浅色基底",
+      "分层表面",
+      "克制小圆角"
+    ]
+  },
+  "theme": {
+    "--tk-font-sans": "-apple-system, \"system-ui\", \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans SC\", \"Noto Sans CJK SC\", sans-serif",
+    "--tk-font-display": "\"Libre Caslon Text\", \"Noto Serif SC\", \"Songti SC\", \"Source Han Serif SC\", STSong, Georgia, serif",
+    "--tk-radius": "4px",
+    "--tk-shadow": "none",
+    "--tk-space": "4px",
+    "--tk-bg": "#ffffff",
+    "--tk-surface": "#f5f5f3",
+    "--tk-text": "#111111",
+    "--tk-muted": "#6b6b67",
+    "--tk-accent": "#111111",
+    "--tk-border": "#2e2e2c"
+  },
+  "warnings": [],
+  "evidenceNotes": [],
+  "style": {
+    "primary": "Editorial",
+    "secondary": "Minimalism",
+    "descriptors": [
+      "报刊式",
+      "克制",
+      "衬线标题",
+      "墨色层级",
+      "高对比"
+    ],
+    "thesis": "白底与暖灰表面托起近黑衬线标题，无衬线正文保持清晰易读。细黑分隔线、小圆角和几乎没有投影，让层次主要来自字号、字重和留白。少量朱红只用于短标签，整体像一份克制的数字报刊。"
+  },
+  "screenshot": "screenshot.png",
+  "validationNotices": [],
+  "fidelity": {
+    "coverage": 0.985,
+    "eligibleRatio": 0.769,
+    "mean": 0.003,
+    "p95": 0,
+    "samples": 62312
+  }
+}
