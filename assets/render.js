@@ -5,6 +5,35 @@ const $ = selector => document.querySelector(selector);
 const STYLE_LABELS = {'Minimalism':'极简','Swiss-International':'瑞士国际主义','Neo-Brutalism':'新粗野主义','Brutalism':'粗野主义','Glassmorphism':'玻璃质感','Neumorphism':'柔和拟物','Claymorphism':'黏土质感','Flat':'扁平化','Material':'材料设计','Skeuomorphism':'拟物风格','Editorial':'编辑排版','Corporate':'商务专业','Dark-Tech':'暗色科技','Retro-Y2K':'复古 Y2K','Memphis':'孟菲斯','Maximalism':'繁复主义','Luxury-Elegant':'精致优雅','Geometric-Bauhaus':'几何包豪斯','Playful-Illustrative':'活泼插画','Organic-Natural':'自然有机'};
 export const styleLabel = value => STYLE_LABELS[value]||value;
 
+function resetScreenshot(image) {
+  image.onload = null;
+  image.onerror = null;
+  image.hidden = false;
+  const fallback = image.parentElement?.querySelector('.media-fallback');
+  if (fallback) fallback.hidden = true;
+}
+
+function watchScreenshot(image) {
+  const fallback = image.parentElement?.querySelector('.media-fallback');
+  const link = image.closest('.reference-image');
+  const loaded = () => {
+    image.hidden = false;
+    if (fallback) fallback.hidden = true;
+    if (link && image.getAttribute('src')) link.href = image.getAttribute('src');
+  };
+  const failed = () => {
+    image.hidden = true;
+    if (fallback) fallback.hidden = false;
+    link?.removeAttribute('href');
+  };
+  image.onload = loaded;
+  image.onerror = failed;
+  if (image.complete) {
+    if (image.naturalWidth) loaded();
+    else failed();
+  }
+}
+
 export function renderGallerySelection(id) {
   for (const card of document.querySelectorAll(".site-card")) {
     const selected = card.dataset.id === id;
@@ -17,9 +46,10 @@ export function renderGallery(entries, selectedId) {
   $('#gallery').setAttribute('aria-busy', 'false');
   $('#gallery').innerHTML = entries.length ? entries.map((entry, index) => `
     <button type="button" class="site-card" data-id="${esc(entry.id)}" aria-pressed="${entry.id === selectedId}" aria-label="${esc(entry.name)}，查看风格详情">
-      <span class="site-media"><img src="sites/${encodeURIComponent(entry.id)}/screenshot.png" loading="lazy" decoding="async" alt=""></span>
+      <span class="site-media"><img src="sites/${encodeURIComponent(entry.id)}/screenshot.png" loading="lazy" decoding="async" alt=""><span class="media-fallback" hidden>截图暂不可用</span></span>
       <span class="card-caption"><span class="card-index">${String(index + 1).padStart(2, '0')}</span><span class="card-copy"><strong title="${esc(entry.name)}">${esc(entry.name)}</strong><span>${esc(entry.descriptors.slice(0, 3).join(' · '))}</span></span><span class="card-arrow" aria-hidden="true">${entry.id === selectedId ? '●' : '↗'}</span></span>
     </button>`).join('') : '<div class="empty"><span>还没有匹配的风格。</span><button class="chip" type="button" data-clear>清除筛选与搜索</button></div>';
+  for (const image of document.querySelectorAll('#gallery .site-media img')) watchScreenshot(image);
 }
 
 export function renderGallerySkeleton() {
@@ -35,6 +65,7 @@ export function renderDetailSkeleton() {
   $('#current-style').textContent = '';
   $('#tags').textContent = '';
   $('#thesis').textContent = '';
+  resetScreenshot($('#current-shot'));
   $('#current-shot').removeAttribute('src');
   $('#current-shot').alt = '';
   $('#current-image-link').removeAttribute('href');
@@ -100,9 +131,11 @@ export function renderDetail(site) {
   $('#tags').innerHTML = (site.style?.descriptors || []).map(value => `<span>${esc(value)}</span>`).join('');
   $('#thesis').textContent = site.style?.thesis?.match(/^.*?[。！？.!?](?:\s|$|(?=[^\x00-\x7F]))/)?.[0]?.trim() || site.style?.thesis || '';
   const screenshot = `sites/${encodeURIComponent(site.id)}/screenshot.png`;
+  resetScreenshot($('#current-shot'));
   $('#current-shot').src = screenshot;
   $('#current-shot').alt = `${site.name}原站参考截图`;
   $('#current-image-link').href = screenshot;
+  watchScreenshot($('#current-shot'));
   $('#source-link').href = safeUrl(site.url);
   $('#detail-error').textContent = '';
   const warnings = Array.isArray(site.warnings) ? site.warnings : [];

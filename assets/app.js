@@ -1,4 +1,4 @@
-import { esc, renderDetail, renderDetailError, renderDetailSkeleton, renderGallery, renderGallerySelection, renderGallerySkeleton, renderGuide, styleLabel } from './render.js?v=20261026-style-fidelity';
+import { esc, renderDetail, renderDetailError, renderDetailSkeleton, renderGallery, renderGallerySelection, renderGallerySkeleton, renderGuide, styleLabel } from './render.js?v=20261030-gallery-recovery';
 
 const $ = selector => document.querySelector(selector);
 const state = {
@@ -86,11 +86,12 @@ async function fetchGuide(id) {
   return response.text();
 }
 
-async function select(id, shouldScroll = false, push = false) {
+async function select(id, shouldScroll = false, push = false, restoreFocus = false) {
   const entry = state.index.find(item => item.id === id);
   if (!entry) return;
   if (id === state.selectedId && state.fullRecords.has(id) && state.guideState === 'ready') {
-    if (shouldScroll) { scrollToTarget($('#detail')); $('#current-name').focus({ preventScroll: true }); }
+    if (shouldScroll) scrollToTarget($('#detail'));
+    if (shouldScroll || restoreFocus) $('#current-name').focus({ preventScroll: true });
     return;
   }
   const version = ++state.selectionVersion;
@@ -113,7 +114,7 @@ async function select(id, shouldScroll = false, push = false) {
   if (version !== state.selectionVersion) return;
   restoreStatus();
   renderDetail(site);
-  if (shouldScroll) $('#current-name').focus({ preventScroll: true });
+  if (shouldScroll || restoreFocus) $('#current-name').focus({ preventScroll: true });
   const guideText = await guideResult;
   if (version !== state.selectionVersion) return;
   updateGuide(guideText);
@@ -136,7 +137,7 @@ async function retryGuide() {
   $(state.guideState === 'ready' ? '#copy-code' : '#retry-guide').focus({ preventScroll: true });
 }
 
-async function restoreLocation() {
+async function restoreLocation(restoreFocus = false) {
   const params = new URLSearchParams(location.search);
   state.query = params.get('q') || '';
   const style = params.get('style') || '';
@@ -144,7 +145,8 @@ async function restoreLocation() {
   renderFilters();
   updateGallery();
   const id = params.get('site');
-  await select(state.index.some(entry => entry.id === id) ? id : state.index[0]?.id);
+  await select(state.index.some(entry => entry.id === id) ? id : state.index[0]?.id, false, false, restoreFocus);
+  saveLocation(false);
 }
 
 async function boot() {
@@ -217,5 +219,5 @@ $('#search').addEventListener('input', event => {
   updateGallery();
   saveLocation();
 });
-window.addEventListener('popstate', () => { void restoreLocation(); });
+window.addEventListener('popstate', () => { void restoreLocation(true); });
 void boot();

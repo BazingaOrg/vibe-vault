@@ -6,11 +6,18 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 
 const root = path.resolve(import.meta.dirname, '..');
+const fixtureIds = ['yeguozi-com', 'historyofmarket-com', 'codex-resets-com'];
 
 test('gallery preserves navigation, handles failures and exports the selected guide', async () => {
   const server = createServer(async (request, response) => {
     try {
       const pathname = new URL(request.url || '/', 'http://localhost').pathname;
+      if (pathname === '/sites/index.json') {
+        const index: { id: string }[] = JSON.parse(await readFile(path.join(root, 'sites/index.json'), 'utf8'));
+        response.setHeader('Content-Type', 'application/json');
+        response.end(JSON.stringify(index.filter(entry => fixtureIds.includes(entry.id))));
+        return;
+      }
       const file = path.join(root, pathname === '/' ? 'index.html' : pathname);
       const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml' };
       response.setHeader('Content-Type', mime[path.extname(file)] || 'text/plain');
@@ -29,7 +36,7 @@ test('gallery preserves navigation, handles failures and exports the selected gu
     await page.goto(`http://127.0.0.1:${address.port}`);
     await page.locator('#copy-code:not([disabled])').waitFor();
     assert.equal(await page.locator('#filters').isVisible(), true);
-    for (const id of ['yeguozi-com', 'historyofmarket-com', 'codex-resets-com']) {
+    for (const id of fixtureIds) {
       await page.locator(`[data-id="${id}"]`).click();
       await page.locator('#copy-code:not([disabled])').waitFor();
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -151,6 +158,51 @@ test('gallery preserves navigation, handles failures and exports the selected gu
     await page.locator('[data-retry-index]').click();
     await page.locator('#copy-code:not([disabled])').waitFor();
     assert.equal(await page.locator('.site-card').count(), 3);
+
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.route('**/screenshot.png', route => route.fulfill({ status: 503, body: '' }));
+    await page.reload();
+    await page.locator('#copy-code:not([disabled])').waitFor();
+    const failedCard = page.locator('.site-card').first();
+    await failedCard.scrollIntoViewIfNeeded();
+    await failedCard.locator('.media-fallback').waitFor({ state: 'visible' });
+    assert.equal(await failedCard.locator('.media-fallback').textContent(), '截图暂不可用');
+    assert.equal(await failedCard.locator('img').isVisible(), false);
+    await page.locator('#current-shot-fallback').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#current-shot-fallback').textContent(), '截图暂不可用');
+    assert.equal(await page.locator('#current-shot').isVisible(), false);
+    assert.equal(await page.locator('#current-image-link').getAttribute('href'), null);
+    await page.locator('[data-id="yeguozi-com"]').click();
+    await page.locator('#copy-code:not([disabled])').waitFor();
+    await page.locator('#current-shot-fallback').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#current-image-link').getAttribute('href'), null);
+    await page.locator('#copy-code').click();
+    await page.waitForFunction(() => document.querySelector('#toast')?.textContent === '已复制风格包');
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), await readFile(path.join(root, 'sites/yeguozi-com/STYLE-GUIDE.md'), 'utf8'));
+    await page.unroute('**/screenshot.png');
+    await page.locator('[data-id="historyofmarket-com"]').click();
+    await page.waitForFunction(() => {
+      const image = document.querySelector<HTMLImageElement>('#current-shot');
+      return image?.complete && image.naturalWidth > 0;
+    });
+    assert.equal(await page.locator('#current-shot-fallback').isVisible(), false);
+    assert.equal(await page.locator('#current-shot').isVisible(), true);
+    assert.ok(await page.locator('#current-image-link').getAttribute('href'));
+
+    const fallbackId = await page.locator('.site-card').first().getAttribute('data-id');
+    assert.ok(fallbackId);
+    await page.evaluate(() => {
+      const url = new URL(location.href);
+      url.searchParams.set('site', 'missing-site');
+      history.pushState(null, '', url);
+    });
+    await page.goBack();
+    await page.waitForFunction(() => new URLSearchParams(location.search).get('site') === 'historyofmarket-com');
+    await page.goForward();
+    await page.waitForFunction(id => new URLSearchParams(location.search).get('site') === id && document.activeElement?.id === 'current-name', fallbackId);
+    assert.equal(new URL(page.url()).searchParams.get('site'), fallbackId);
+    assert.equal(await page.locator('#current-name').evaluate(node => node === document.activeElement), true);
+
     const exported = await readFile(path.join(root, 'sites/codex-resets-com/STYLE-GUIDE.md'), 'utf8');
     const css = exported.match(/```css\n([\s\S]*?)```/)?.[1];
     assert.ok(css);
