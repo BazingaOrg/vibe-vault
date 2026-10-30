@@ -26,7 +26,7 @@ export function stability(sample: RawSample, seen: number): Stability {
   return "L3";
 }
 type Cluster = {
-  o: O; hex: string; count: number; area: number;
+  o: O; hex: string; count: number; area: number; stable: boolean;
   props: Record<string, number>; propAreas: Record<string, number>;
   levels: Record<Stability, number>; propLevels: Record<string, Record<Stability, number>>;
 };
@@ -38,8 +38,9 @@ export function clusterColors(raw: RawExtraction): Cluster[] {
   for (const item of all) {
     const o = colorToOklch(item.value), h = hex(item.value); if (!o || !h) continue;
     const level = stability(item.sample, occurrences.get(item.value) ?? 1);
-    let c = clusters.find((v) => distance(v.o, o) <= .06);
-    if (!c) { c = { o, hex: h, count: 0, area: 0, props: {}, propAreas: {}, levels: { L1: 0, L2: 0, L3: 0, L4: 0 }, propLevels: {} }; clusters.push(c); }
+    const stable = level === "L1" || level === "L2";
+    let c = clusters.find((v) => v.stable === stable && distance(v.o, o) <= .06);
+    if (!c) { c = { o, hex: h, count: 0, area: 0, stable, props: {}, propAreas: {}, levels: { L1: 0, L2: 0, L3: 0, L4: 0 }, propLevels: {} }; clusters.push(c); }
     const area = Math.max(1, item.sample.rect.width * item.sample.rect.height);
     c.count++; c.area += area; c.props[item.prop] = (c.props[item.prop] ?? 0) + 1;
     c.propAreas[item.prop] = (c.propAreas[item.prop] ?? 0) + area;
@@ -114,7 +115,7 @@ function roleColors(clusters: Cluster[], rootVariables: Record<string, string> =
     const o = colorToOklch(value);
     const match = o ? eligible.find((c) => distance(c.o, o) <= .06) : undefined;
     if (!match) continue;
-    fromVars.set(role, tokenFromCluster(role, value, match, clusters));
+    fromVars.set(role, tokenFromCluster(role, value, match, eligible));
     used.add(match);
   }
 
@@ -148,7 +149,7 @@ function roleColors(clusters: Cluster[], rootVariables: Record<string, string> =
   return roles.flatMap((role) => {
     if (fromVars.has(role)) return [fromVars.get(role)!];
     const c = fromCluster[role];
-    return c ? [{ role, hex: c.hex, stability: level(c), freq: Number((c.count / Math.max(1, clusters.reduce((n, x) => n + x.count, 0))).toFixed(3)) }] : [];
+    return c ? [{ role, hex: c.hex, stability: level(c), freq: Number((c.count / Math.max(1, eligible.reduce((n, x) => n + x.count, 0))).toFixed(3)) }] : [];
   });
 }
 const median = (v: number[]) => { const x=[...v].sort((a,b)=>a-b); return x[Math.floor(x.length/2)] ?? 0; };

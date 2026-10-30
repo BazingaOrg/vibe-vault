@@ -1,11 +1,12 @@
 import { copyFile, cp, mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { chromium, type Browser, type Page } from "playwright";
+import { normalize } from "./normalize.js";
 import type { RawExtraction } from "./schema.js";
 
 export function siteId(url: string): string {
   const h = new URL(url).hostname.replace(/^www\./, "");
-  return h.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
+  return h.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() || "local";
 }
 
 const VIEWPORT = { width: 1440, height: 900 } as const;
@@ -101,7 +102,7 @@ async function publishCollection(stagingDir: string, targetDir: string) {
   const nextDir = await mkdtemp(path.join(extractorRoot, `.${path.basename(targetDir)}-publish-`));
   const nextEvidence = path.join(nextDir, "evidence");
 
-  // Build a complete next snapshot, retaining judgments/drafts and manual evidence.
+  // Build a complete next snapshot, archiving judgment and retaining manual evidence.
   try {
     try { await cp(targetDir, nextDir, { recursive: true, force: true }); } catch (error) { if (!missingPath(error)) throw error; }
     await rm(path.join(nextDir, "last-collect-error.json"), { force: true });
@@ -120,6 +121,7 @@ async function publishCollection(stagingDir: string, targetDir: string) {
     }
     await copyFile(path.join(stagingDir, "screenshot.png"), path.join(nextDir, "screenshot.png"));
     await copyFile(path.join(stagingDir, "raw.json"), path.join(nextDir, "raw.json"));
+    await copyFile(path.join(stagingDir, "draft.json"), path.join(nextDir, "draft.json"));
 
     const backupDir = `${targetDir}.${process.pid}.old`;
     let hadTarget = false;
@@ -147,6 +149,7 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
   const evidenceDir = path.join(stagingDir, "evidence");
   await mkdir(evidenceDir, { recursive: true });
   let browser: Browser | undefined;
+  let drafting = false;
   const warnings: string[] = [];
   const evidenceNotes: string[] = [];
   const evidence: Array<{ name: string; note: string; url: string; file: string }> = [];
@@ -245,9 +248,14 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
       evidenceNotes,
     };
     await writeFile(path.join(stagingDir, "raw.json"), JSON.stringify(raw, null, 2));
+    drafting = true;
+    const draft = normalize(raw);
+    await writeFile(path.join(stagingDir, "draft.json"), JSON.stringify(draft, null, 2) + "\n");
+    drafting = false;
     await publishCollection(stagingDir, dir);
     return { raw, dir, status: warnings.length ? "limited" : "ready" };
   } catch (error) {
+    if (drafting) throw error;
     warnings.push(`采集不完整：${error instanceof Error ? error.message : String(error)}`);
     const raw: RawExtraction = {
       url,
@@ -260,15 +268,15 @@ export async function collect(url: string, root = process.cwd()): Promise<{ raw:
       warnings,
       evidenceNotes,
     };
-    try {
-      const previous = JSON.parse(await readFile(path.join(dir, "raw.json"), "utf8")) as RawExtraction;
-      await writeFile(path.join(dir, "last-collect-error.json"), JSON.stringify({ attemptedAt: raw.collectedAt, url, warnings }, null, 2) + "\n");
+    let previous: RawExtraction | undefined;
+    try { previous = JSON.parse(await readFile(path.join(dir, "raw.json"), "utf8")) as RawExtraction; } catch { /* no reusable collection */ }
+    if (previous) {
+      try { await writeFile(path.join(dir, "last-collect-error.json"), JSON.stringify({ attemptedAt: raw.collectedAt, url, warnings }, null, 2) + "\n"); } catch { /* error logging is best-effort */ }
       return { raw: previous, dir, status: "reused" };
-    } catch {
-      await mkdir(dir, { recursive: true });
-      await writeFile(path.join(dir, "raw.json"), JSON.stringify(raw, null, 2));
-      return { raw, dir, status: "failed" };
     }
+    await mkdir(dir, { recursive: true });
+    await writeFile(path.join(dir, "raw.json"), JSON.stringify(raw, null, 2));
+    return { raw, dir, status: "failed" };
   } finally {
     await browser?.close();
     await rm(stagingDir, { recursive: true, force: true });

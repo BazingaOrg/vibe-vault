@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { STYLE_VOCABULARY, type Draft, type FidelityResult, type IndexEntry, type Judgment, type SiteRecord, type ValidationFlag } from "./schema.js";
 import { fidelity } from "./verify.js";
@@ -146,7 +146,9 @@ async function readIndex(indexFile: string): Promise<IndexEntry[]> {
   if (new Set(value.map((entry) => entry.id)).size !== value.length) throw new Error("sites/index.json 包含重复 ID。");
   return value;
 }
-export async function finalize(draft: Draft, judgment: unknown, workDir=process.cwd()): Promise<SiteRecord> {
+async function finalizeOnce(value: unknown, judgment: unknown, workDir=process.cwd()): Promise<SiteRecord> {
+  if (!value || typeof value !== "object" || (value as { schemaVersion?: unknown }).schemaVersion !== 2) throw new Error("draft.json schemaVersion 必须为 2，请重新运行 collect。");
+  const draft=value as Draft;
   const style=validateJudgment(judgment), staging=path.join(workDir,".style-extractor",draft.id), screenshot=path.join(staging,"screenshot.png"); const raw=JSON.parse(await readFile(path.join(staging,"raw.json"),"utf8"));
   const record:SiteRecord={...draft,style,screenshot:"screenshot.png",validationNotices:[]};
   const primaryScreenshot=path.join(staging,"evidence","primary-top.png");
@@ -158,8 +160,49 @@ export async function finalize(draft: Draft, judgment: unknown, workDir=process.
     }
     record.validationNotices=fidelityNotices(record.fidelity);
   } catch { record.validationNotices=["无法完成截图保真校验，结果仅供参考。"] }
-  const indexFile=path.join(workDir,"sites","index.json"); const index=await readIndex(indexFile);
+  const sitesRoot=path.join(workDir,"sites"), indexFile=path.join(sitesRoot,"index.json"); const index=await readIndex(indexFile);
   const nextIndex=sortIndex([...index.filter(x=>x.id!==record.id),indexEntry(record)]);
-  const target=path.join(workDir,"sites",draft.id); await mkdir(target,{recursive:true}); await copyFile(screenshot,path.join(target,"screenshot.png")); await atomicJson(path.join(target,"site.json"),record); await writeFile(path.join(target,"STYLE-GUIDE.md"),guide(record));
-  await atomicJson(indexFile,nextIndex); return record;
+  const document=guide(record);
+  await mkdir(sitesRoot,{recursive:true});
+  const target=path.join(sitesRoot,draft.id), nextDir=await mkdtemp(path.join(sitesRoot,`.${draft.id}-finalize-`));
+  const backup=`${target}.${process.pid}.old`, indexTmp=`${indexFile}.${path.basename(nextDir)}.tmp`;
+  let hadTarget=false;
+  try {
+    try { await cp(target,nextDir,{recursive:true,force:true}); } catch (error) { if (!missingPath(error)) throw error; }
+    await copyFile(screenshot,path.join(nextDir,"screenshot.png"));
+    await atomicJson(path.join(nextDir,"site.json"),record);
+    await writeFile(path.join(nextDir,"STYLE-GUIDE.md"),document);
+    await writeFile(indexTmp,JSON.stringify(nextIndex,null,2)+"\n");
+    try { await rename(target,backup); hadTarget=true; } catch (error) { if (!missingPath(error)) throw error; }
+    try {
+      await rename(nextDir,target);
+    } catch (error) {
+      if (hadTarget) await rename(backup,target);
+      throw error;
+    }
+    try {
+      await rename(indexTmp,indexFile);
+    } catch (error) {
+      await rm(target,{recursive:true,force:true});
+      if (hadTarget) await rename(backup,target);
+      throw error;
+    }
+    if (hadTarget) {
+      try { await rm(backup,{recursive:true,force:true}); } catch { /* committed; cleanup is best-effort */ }
+    }
+  } finally {
+    await rm(nextDir,{recursive:true,force:true});
+    await rm(indexTmp,{recursive:true,force:true});
+  }
+  return record;
+}
+
+const finalizations = new Map<string, Promise<void>>();
+export async function finalize(value: unknown, judgment: unknown, workDir=process.cwd()): Promise<SiteRecord> {
+  const key=path.resolve(workDir), previous=finalizations.get(key) ?? Promise.resolve();
+  const run=previous.then(()=>finalizeOnce(value,judgment,workDir));
+  const settled=run.then(()=>undefined,()=>undefined);
+  finalizations.set(key,settled);
+  try { return await run; }
+  finally { if (finalizations.get(key)===settled) finalizations.delete(key); }
 }
